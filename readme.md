@@ -1,6 +1,6 @@
 # Group F year 1 period 1 
 
-## Project OUI
+## Project Gemorskos
 
 A NHLStenden student project in cooparation with an imaginary dutch newspaper that is represented by one of our teachers Bart Oerlemans.
 
