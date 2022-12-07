@@ -31,11 +31,6 @@ header p {
 	margin-left: 20px;
 }
 
-nav {
-	grid-column: ;
-	background-color: yellow;
-}
-
 nav ul {
 	list-style-type: none;
 	
@@ -49,7 +44,13 @@ nav ul {
 
 nav li img{
 	margin-right: 24px;
-	height: 56px;
+    padding: 15px;
+    
+    height: 35px;
+    width: 35px;
+    
+    background-color: #D9D9D9;
+    border-radius: 100%;
 }
 
 nav li a {
