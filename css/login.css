@@ -45,8 +45,13 @@ form {
 	align-items: center;
 }
 
+/* this element is hidden on the login page but is visible on the password recovery */
 p {
-    grid-column: 4/8;
+    visibility: hidden;
+    
+    margin: 16px 250px 20px 250px;
+    text-align: center;
+    color: #8F8F8F;
 }
 
 /* IDs */
