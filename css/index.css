@@ -24,8 +24,8 @@ header {
 }
 
 header p {
-	font-size: 36px;
-	margin-left: 20px;
+	font-size: 2.25rem;
+	margin-left: 1.25rem;
 }
 
 nav ul {
@@ -43,14 +43,14 @@ nav li {
     background-color: #D9D9D9;
     border-radius: 100%;
     
-    margin-right: 25px;
+    margin-right: 1.563rem;
 }
 
 nav li img{
-    padding: 15px;
+    padding: 0.938rem;
     
-    height: 30px;
-    width: 30px;
+    height: 1.875rem;
+    width: 1.875rem;
 }
 
 nav li a {
