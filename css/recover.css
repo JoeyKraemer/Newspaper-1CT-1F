@@ -5,11 +5,14 @@
 }
 
 /* HTML Tags */
+html * {
+    font-family: Inter;
+}
+
 body {
 	padding: 0;
 	margin: 0;
 	background-color:#B2BCBC;
-	font-family: Inter;
 }
 
 main {
@@ -45,6 +48,10 @@ form {
 	align-items: center;
 }
 
+form * {
+    border: none;
+}
+
 button {
     width: 116px;
 	height: 39px;
@@ -52,6 +59,7 @@ button {
 	margin-bottom: 22px;
 	
 	background-color: white;
+    border: none;
 }
 
 /* this element is hidden on the login page but is visible on the password recovery */
