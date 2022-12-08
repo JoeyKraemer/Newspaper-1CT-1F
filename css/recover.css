@@ -1,0 +1,95 @@
+/* Media queries */
+@font-face {
+    font-family: 'Inter';
+    src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
+}
+
+/* HTML Tags */
+body {
+	padding: 0;
+	margin: 0;
+	background-color:#B2BCBC;
+	font-family: Inter;
+}
+
+main {
+	display: grid;
+	grid-column: 3/9;
+	
+	background-color: #F1F1F1;
+	height: 100vh;
+}
+
+h1 { 
+	text-align: center;
+	font-weight: 400;
+	
+	margin-top: 84px;
+}
+
+a {
+	text-align: center;
+	text-decoration: none;
+	color: black;
+}
+
+input {
+	margin-bottom: 22px;
+	
+	text-align: center;
+}
+
+form {
+    display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+button {
+    width: 116px;
+	height: 39px;
+	
+	margin-bottom: 22px;
+	
+	background-color: white;
+}
+
+/* this element is hidden on the login page but is visible on the password recovery */
+p {
+/*  visibility: hidden; */
+    
+    margin: 16px 250px 20px 250px;
+    text-align: center;
+    color: #8F8F8F;
+}
+
+/* IDs */
+#container {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);	
+}
+
+#content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#email {
+	width: 212px;
+	height: 39px;
+}
+
+#submit {
+    width: 116px;
+	height: 39px;
+	
+	margin-bottom: 22px;
+	
+	background-color: white;
+}
+
+#idNumber {
+	width: 212px;
+	height: 39px;
+}
