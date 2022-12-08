@@ -5,11 +5,14 @@
 }
 
 /* HTML Tags */
+html * {
+    font-family: Inter;
+}
+
 body {
 	padding: 0;
 	margin: 0;
 	background-color:#B2BCBC;
-	font-family: Inter;
 }
 
 main {
@@ -43,6 +46,10 @@ form {
     display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+form * {
+    border: none;
 }
 
 /* this element is hidden on the login page but is visible on the password recovery */
