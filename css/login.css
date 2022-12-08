@@ -1,8 +1,10 @@
+/* Media queries */
 @font-face {
     font-family: 'Inter';
     src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
 }
 
+/* HTML Tags */
 body {
 	padding: 0;
 	margin: 0;
@@ -10,16 +12,12 @@ body {
 	font-family: Inter;
 }
 
-#container {
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);	
-}
-
 main {
 	display: grid;
 	grid-column: 3/9;
 	
 	background-color: #F1F1F1;
+	height: 100vh;
 }
 
 h1 { 
@@ -27,7 +25,6 @@ h1 {
 	font-weight: 400;
 	
 	margin-top: 84px;
-	margin-bottom: 97px;
 }
 
 a {
@@ -36,17 +33,32 @@ a {
 	color: black;
 }
 
-.input {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-}
-
 input {
 	margin-bottom: 22px;
 	
 	text-align: center;
+}
+
+form {
+    display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+p {
+    grid-column: 4/8;
+}
+
+/* IDs */
+#container {
+	display: grid;
+	grid-template-columns: repeat(10, 1fr);	
+}
+
+#content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 #email {
@@ -54,16 +66,16 @@ input {
 	height: 39px;
 }
 
-#pass {
-	width: 212px;
-	height: 39px;
-}
-
-button {
-	width: 116px;
+#submit {
+    width: 116px;
 	height: 39px;
 	
 	margin-bottom: 22px;
 	
 	background-color: white;
+}
+
+#pass {
+	width: 212px;
+	height: 39px;
 }
