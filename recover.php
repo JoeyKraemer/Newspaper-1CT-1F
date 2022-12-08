@@ -22,10 +22,10 @@
             <input type="email” name="email" id="email" placeholder="Email">
             <input type="text" name="idNumber" id="idNumber" placeholder="Employee ID Number">
 
-            <input type="submit" id="submit" value="Log In"> 
+            <input type="submit" id="submit" value="Submit"> 
             </form>
             
-            <button type="button"> <a href=""> Back to login </a> </button>
+            <button type="button"> <a href="login.php"> Back to login </a> </button>
             
         </div>		
         </main>

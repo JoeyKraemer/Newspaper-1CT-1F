@@ -26,7 +26,7 @@
             </form>
             
             <!-- pass reset link -->
-            <a href="#"> Forgot your password? </a>
+            <a href="recover.php"> Forgot your password? </a>
             
         </div>		
         </main>
