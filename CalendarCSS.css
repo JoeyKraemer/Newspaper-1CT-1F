@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+#container {
+    display: grid;
+    font-family: Inter;
+    font-weight: 400;
+    grid-template-columns: repeat(8,1fr);
+}
+
+body {
+    background-color: gray;
+}
+
+.WelcomeUser {
+    grid-column: 2/3;
+
+}
+
+main {
+    display: flex;
+    grid-column: 2/8;
+    background-color: #F1F1F1;
+}
+main > .dateAndEvents {
+    flex: 25%;
+}
+#dateAndEvents {
+    display: flex;
+    background-color: #50595B;
+    color: white;
+    flex-direction: column;
+    flex: 25%;
+}
+
+#date {
+    display: flex;
+}
+
+#date h3 {
+    margin: 0;
+    padding: 0;
+    line-height: 1.25em;
+
+    font-family: Inter;
+    font-weight: 400;
+
+}
+
+#daysAndWeeks {
+    grid-column: 4/8;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-spacing: 25px;
+    border-collapse: separate;
+    padding-left: 50px;
+    padding-right: 50px;
+
+}
+
+td, th {
+    text-align: left;
+    padding: 8px;
+    border-radius: 50%;
+    text-align: center;
+
+    height: 25px;
+    width: 25px;
+    background-color: #dddddd
+}
+#calendar {
+    display: flex;
+}
+ul {
+    padding-left: 10px;
+    margin: 0;
+}
