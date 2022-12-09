@@ -1,12 +1,13 @@
 -- Please import this statement to your database via PHPmyAdmin
 
+DROP DATABSE IF EXISTS `webapplication`
 -- Create database change value in ` ` to your needs 
 CREATE DATABASE IF NOT EXISTS `webapplication` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 SET FOREIGN_KEY_CHECKS=0;
 use webapplication;
 
+
 -- Table TypesOfStaff
-DROP TABLE IF EXISTS `TypesOfStaff`;
 CREATE TABLE `TypesOfStaff` (
    type_of_staff_id INT AUTO_INCREMENT NOT NULL,
    type_of_staff_description VARCHAR(25) UNIQUE NOT NULL,
@@ -14,7 +15,6 @@ CREATE TABLE `TypesOfStaff` (
 );
 
 -- Table Roles
-DROP TABLE IF EXISTS `Roles`;
 CREATE TABLE `Roles` (
    role_id INT AUTO_INCREMENT NOT NULL,
    role_name VARCHAR(25) UNIQUE NOT NULL,
@@ -23,7 +23,6 @@ CREATE TABLE `Roles` (
 );
 
 -- Table Event
-DROP TABLE IF EXISTS `Event`;
 CREATE TABLE `Event` (
    event_id INT AUTO_INCREMENT NOT NULL,
    event_name VARCHAR(70) UNIQUE NOT NULL,
@@ -36,7 +35,7 @@ CREATE TABLE `Event` (
 );
 
 -- Table User
-DROP TABLE IF EXISTS `User`;
+
 CREATE TABLE `User` (
    user_id INT AUTO_INCREMENT NOT NULL,
    user_name VARCHAR(25) UNIQUE NOT NULL,
@@ -47,19 +46,20 @@ CREATE TABLE `User` (
    email_address VARCHAR(50) UNIQUE NOT NULL,
    type_of_staff INT NOT NULL,
    user_role INT NOT NULL,
+   inactive BOOLEAN,
    PRIMARY KEY(user_id),
-   FOREIGN KEY(type_of_staff) REFERENCES TypesOfStaff(type_of_staff_id) ON UPDATE CASCADE,
-   FOREIGN KEY(user_role) REFERENCES Roles(role_id) ON UPDATE CASCADE
+   FOREIGN KEY(type_of_staff) REFERENCES TypesOfStaff(type_of_staff_id) ON UPDATE CASCADE ON DELETE NO ACTION,
+   FOREIGN KEY(user_role) REFERENCES Roles(role_id) ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
 -- Table Event_Details
-DROP TABLE IF EXISTS `Event_Details`;
 CREATE TABLE `Event_Details` (
    event_details_id INT AUTO_INCREMENT NOT NULL,
    event_id INT NOT NULL,
    user_id INT NOT NULL,
+   Checkin_date TIMESTAMP NOT NULL,
    PRIMARY KEY(event_details_id),
-   FOREIGN KEY(event_id) REFERENCES Event(event_id) ON UPDATE CASCADE,
-   FOREIGN KEY(user_id) REFERENCES User(user_id) ON UPDATE CASCADE
+   FOREIGN KEY(event_id) REFERENCES Event(event_id) ON UPDATE CASCADE ON DELETE NO ACTION,
+   FOREIGN KEY(user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE NO ACTION
 );
 SET FOREIGN_KEY_CHECKS=1;
