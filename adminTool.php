@@ -2,8 +2,7 @@
 <?php
 //placeholders
 $dbname = "webapplication";
-$username = "root";
-$password = "qwerty";
+include 'adminPass.php';
 $userLoggedIn = true;
 $permissions = true;
 
@@ -46,25 +45,35 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
 
 
     if(isset($_GET['view'])){
+        $view = $_GET['view'];
+        $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}";
 
         // shows the users database
-        switch ($_GET['view']) {
+        switch ($view) {
 
             case 'TypesOfStaff':
 
+                $sort = 'type_of_staff_id';
+                if (isset($_GET["sort"])){
+                    if ($_GET["sort"] == 'description') {
+                        $sort = 'type_of_staff_description';
+                    }
+                }
+
                 // prepares the query and fetches the results
-                $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY type_of_staff_id LIMIT :show OFFSET :offset");
+                $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY $sort LIMIT :show OFFSET :offset");
                 $stmt->bindParam('show', $show, PDO::PARAM_INT);
                 $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                 $stmt->execute();
                 $result = $stmt->fetchAll();
 
+
                 echo "
                 <h1>Account Types</h1>
                 <table id='typeTable'>
                     <tr>
-                        <th> Type </th>
-                        <th> Description </th>
+                        <th> <a href='{$returnLink}&sort=id'>Type</a> </th>
+                        <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
                     </tr>
                 ";
 
@@ -74,7 +83,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                         <tr class='{$entry['type_of_staff_id']}'>
                             <td> {$entry['type_of_staff_id']} </td>
                             <td> <div class='description'>{$entry['type_of_staff_description']}</div></td>
-                            <!-- <td> <a href='javascript:updateStaffType({$entry['type_of_staff_id']})'> save changes </a> </td> --> <!-- editing this might be outside the scope -->
+                            <!-- <td> <a href='javascript:updateStaffType({$entry['type_of_staff_id']})'> save changes </a> </td> --> <!-- allowing edits for this might be outside the scope -->
                         </tr>
                     ";
                 }
@@ -85,8 +94,20 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
 
             case 'Roles':
 
+                $sort = 'role_id';
+                if (isset($_GET["sort"])){
+                    switch ($_GET["sort"]) {
+                        case 'name':
+                            $sort = 'role_name';
+                            break;
+                        case 'description':
+                            $sort = 'role_description';
+                            break;
+                    }
+                }
+
                 // prepares the query and fetches the results
-                $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles` ORDER BY role_id LIMIT :show OFFSET :offset");
+                $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles` ORDER BY $sort LIMIT :show OFFSET :offset");
                 $stmt->bindParam('show', $show, PDO::PARAM_INT);
                 $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                 $stmt->execute();
@@ -96,8 +117,9 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 <h1>Roles</h1>
                 <table>
                     <tr>
-                        <th> Role </th>
-                        <th> Description </th>
+                        <th> <a href='{$returnLink}&sort=id'>Role</a> </th>
+                        <th> <a href='{$returnLink}&sort=name'>Name</a> </th>
+                        <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
                         <th> Edit </th>
                     </tr>
                 ";
@@ -117,7 +139,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     </table>
                     
                     <h2>add role</h2>
-                    <form id='addRoleForm' action='adminTool.php?show={$show}&page={$page}&view=Roles' method='post'>
+                    <form id='addRoleForm' action='{$returnLink}' method='post'>
                     <input type='hidden' name='id' value='null'/>
                     <label>Name: <input type='text' name='role_name'/></label> <br/>
                     <label>Description: <textarea name='role_description'></textarea></label> <br/>
@@ -131,8 +153,29 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
 
             case 'Event':
 
+                $sort = 'event_id';
+                if (isset($_GET["sort"])){
+                    switch ($_GET["sort"]) {
+                        case 'name':
+                            $sort = 'event_name';
+                            break;
+                        case 'description':
+                            $sort = 'event_description';
+                            break;
+                        case 'street':
+                            $sort = 'location_street';
+                            break;
+                        case 'code':
+                            $sort = 'location_postal_code';
+                            break;
+                        case 'city':
+                            $sort = 'location_city';
+                            break;
+                    }
+                }
+
                 // prepares the query and fetches the results
-                $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, claimed  FROM `Event` LIMIT :show OFFSET :offset");
+                $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, claimed  FROM `Event` ORDER BY $sort LIMIT :show OFFSET :offset");
                 $stmt->bindParam('show', $show, PDO::PARAM_INT);
                 $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                 $stmt->execute();
@@ -142,12 +185,12 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     <h1>Events</h1>
                     <table>
                         <tr>
-                            <th> Event Number </th>
-                            <th> Name </th>
-                            <th> Description </th>
-                            <th> Street </th>
-                            <th> Postal Code </th>
-                            <th> City </th>
+                            <th> <a href='{$returnLink}&sort=id'>Event Number</a> </th>
+                            <th> <a href='{$returnLink}&sort=name'>Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
+                            <th> <a href='{$returnLink}&sort=street'>Street</a> </th>
+                            <th> <a href='{$returnLink}&sort=code'>Postal Code</a> </th>
+                            <th> <a href='{$returnLink}&sort=city'>City</a> </th>
                             <th> claimed? </th>
                             <th> Edit </th>
                         <tr/>
@@ -172,7 +215,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 echo "
                     </table>
                     <h2>add event</h2>
-                    <form id='addEventForm' action='adminTool.php?show={$show}&page={$page}&view=Event' method='post'>
+                    <form id='addEventForm' action='{$returnLink}' method='post'>
                     <input type='hidden' name='event_id' value='null'/>
                     <label>event name: <input type='text' name='event_name'/></label> <br/>
                     <label>event description: <textarea name='event_description'></textarea></label> <br/>
@@ -189,28 +232,59 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
 
             case 'User':
 
+                $sort = 'user_id';
+                if (isset($_GET["sort"])){
+                    switch ($_GET["sort"]) {
+                        case 'name':
+                            $sort = 'user_name';
+                            break;
+                        case 'date':
+                            $sort = 'password_change_date';
+                            break;
+                        case 'first':
+                            $sort = 'first_name';
+                            break;
+                        case 'last':
+                            $sort = 'last_name';
+                            break;
+                        case 'email':
+                            $sort = 'email_address';
+                            break;
+                        case 'type':
+                            $sort = 'type_of_staff';
+                            break;
+                        case 'role':
+                            $sort = 'user_role';
+                            break;
+                    }
+                }
+
                 // prepares the query and fetches the results
-                $stmt = $handler->prepare("SELECT user_id, user_name, password_change_date, first_name, last_name, email_address, type_of_staff, user_role  FROM `User` LIMIT :show OFFSET :offset");
+                $stmt = $handler->prepare("SELECT user_id, user_name, password_change_date, first_name, last_name, email_address, type_of_staff, user_role  FROM `User` ORDER BY $sort LIMIT :show OFFSET :offset");
                 $stmt->bindParam('show', $show, PDO::PARAM_INT);
                 $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                 $stmt->execute();
                 $result = $stmt->fetchAll();
 
+                $stmt = $handler->prepare("SELECT role_id, role_name FROM `Roles` ORDER BY role_id ASC");
+                $stmt->execute();
+                $roles = $stmt->fetchAll();
+
                 echo "
                     <h1>Users</h1>
                     <table>
                         <tr>
-                            <th> ID </th>
-                            <th> Username </th>
-                            <th> Password Change Date </th>
-                            <th> First Name </th>
-                            <th> Last Name </th>
-                            <th> Email Address </th>
-                            <th> Account Type </th>
-                            <th> User Role </th>
+                            <th> <a href='{$returnLink}&sort=id'>ID</a> </th>
+                            <th> <a href='{$returnLink}&sort=name'>Username</a> </th>
+                            <th> <a href='{$returnLink}&sort=date'>Password Change Date</a> </th>
+                            <th> <a href='{$returnLink}&sort=first'>First Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=last'>Last Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=email'>Email Address</a> </th>
+                            <th> <a href='{$returnLink}&sort=type'>Account Type</a> </th>
+                            <th> <a href='{$returnLink}&sort=role'>User Role</a> </th>
                             <th> Edit </th>
                         <tr/>
-                    ";
+                        ";
 
                 // adds the users to the table
                 foreach ($result as $entry) {
@@ -224,14 +298,22 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                                 <td> <div contenteditable class = 'last_name'>{$entry['last_name']}</div> </td>
                                 <td> <div contenteditable class = 'email_address'>{$entry['email_address']}</div> </td>
                                 <td>
-                                    <label><input type='radio' name='type' class='radio1' value='1'" . (($entry['type_of_staff'] == 1) ? "checked='true'" : '') . "/> manager</label>    <!-- PLACEHOLDER VALUES -->     <!-- these can possibly be dynamically allocated, however support for additional roles or account types is not in our scope -->
-                                    <label><input type='radio' name='type' class='radio2' value='2'" . (($entry['type_of_staff'] == 2) ? "checked='true'" : '') . "/> freelancer</label>
-                                    <label><input type='radio' name='type' class='radio3' value='3'" . (($entry['type_of_staff'] == 3) ? "checked='true'" : '') . "/> in-house</label>
+                                    <select class='type' autocomplete='off'>
+                                        <option value='1' " . (($entry['type_of_staff'] == 1) ? "selected" : '') . ">manager</option>
+                                        <option value='2' " . (($entry['type_of_staff'] == 2) ? "selected" : '') . ">in-house</option>
+                                        <option value='3' " . (($entry['type_of_staff'] == 3) ? "selected" : '') . ">freelancer</option>
+                                    </select>
                                 </td>
                                 <td>
-                                    <label><input type='radio' name='role' class='radio4' value='1'" . (($entry['user_role'] == 1) ? "checked='true'" : '') . "/> photographer</label>    <!-- PLACEHOLDER VALUES -->
-                                    <label><input type='radio' name='role' class='radio5' value='2'" . (($entry['user_role'] == 2) ? "checked='true'" : '') . "/> editor</label>
-                                    <label><input type='radio' name='role' class='radio6' value='3'" . (($entry['user_role'] == 3) ? "checked='true'" : '') . "/> writer</label>
+                                    <select class='role' autocomplete='off'>
+                                        ";
+
+                    // dynamically adds roles
+                    foreach($roles as $role){
+                        echo "<option value='{$role['role_id']}'" . (($entry['user_role'] == $role['role_id']) ? "selected" : '') . ">{$role['role_name']}</option>";
+                    }
+                    echo "
+                                    </select>
                                 </td>
                                 <td> <a href='javascript:updateUser({$entry['user_id']})'> save changes </a> </td>
                             </form>
@@ -244,20 +326,28 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     </table>
                     
                     <h2>add user</h2>
-                    <form id='addUserForm' action='adminTool.php?show={$show}&page={$page}&view=User' method='post'>
+                    <form id='addUserForm' action='{$returnLink}' method='post'>
                     <input type='hidden' name='id' value='null'/>
                     <label>username:<input type='text' name='user_name'></label><br/>
                     <label>first name:<input type='text' name='first_name'></label><br/>
                     <label>last name:<input type='text' name='last_name'></label><br/>
                     <label>email adress:</label><input type='text' name='email_address'></label><br/>
                     <label>user type: </label> <br/>
-                    <label><input type='radio' name='type_of_staff' value=1 /> manager</label><br/>
-                    <label><input type='radio' name='type_of_staff' value=2 /> freelance</label><br/>
-                    <label><input type='radio' name='type_of_staff' value=3 /> in-house</label><br/>
+                    <select name='type_of_staff' autocomplete='off'>
+                        <option value='1'>manager</option>
+                        <option value='2'>in-house</option>
+                        <option value='3' selected>freelancer</option>
+                    </select> <br/>
                     <label>user role:</label> <br/>
-                    <label><input type='radio' name='user_role' value=1 /> photographer</label><br/>
-                    <label><input type='radio' name='user_role' value=2 /> editor</label><br/>
-                    <label><input type='radio' name='user_role' value=3 /> writer</label><br/>
+                    <select name='user_role' autocomplete='off'>
+                    ";
+
+                // dynamically adds roles
+                foreach($roles as $role){
+                    echo "<option value='{$role['role_id']}'>{$role['role_name']}</option>";
+                }
+                echo "
+                    </select> <br/>
                     <input type='hidden' name='requestType' value='createUser'/>
                     <input type='submit' value='add'/>
                     </form>
@@ -266,7 +356,20 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 break;
 
             case 'EventDetails':
-                $stmt = $handler->prepare("SELECT event_details_id, event_id, user_id  FROM `Event_Details` LIMIT :show OFFSET :offset");
+
+                $sort = 'event_details_id';
+                if (isset($_GET["sort"])){
+                    switch ($_GET["sort"]) {
+                        case 'event':
+                            $sort = 'event_id';
+                            break;
+                        case 'user':
+                            $sort = 'user_id';
+                            break;
+                    }
+                }
+
+                $stmt = $handler->prepare("SELECT event_details_id, event_id, user_id  FROM `Event_Details` ORDER BY $sort LIMIT :show OFFSET :offset");
                 $stmt->bindParam('show', $show, PDO::PARAM_INT);
                 $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                 $stmt->execute();
@@ -276,9 +379,9 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 <h1>Event Details</h1>
                 <table>
                     <tr>
-                        <th> Event Details ID </th>
-                        <th> Event </th>
-                        <th> User </th>
+                        <th> <a href='{$returnLink}&sort=id'>Event Details ID</a> </th>
+                        <th> <a href='{$returnLink}&sort=event'>Event</a> </th>
+                        <th> <a href='{$returnLink}&sort=user'>User</a> </th>
                     </tr>
                 ";
 

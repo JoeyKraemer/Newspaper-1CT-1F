@@ -37,7 +37,6 @@ function updateEvent(id){
 function updateUser(id)
 {
     // assign values based on the text inside the cells of the table after a user has edited it
-    type = null;
     role = null;
     selection = document.getElementsByClassName(id)[0];
 
@@ -47,13 +46,12 @@ function updateUser(id)
     last_name = selection.getElementsByClassName('last_name')[0].innerHTML;
     email_address = selection.getElementsByClassName('email_address')[0].innerHTML;
 
-    if(selection.getElementsByClassName('radio1')[0].checked){type = 1;}       // PLACEHOLDER VALUES
-    else if(selection.getElementsByClassName('radio2')[0].checked){type = 2;}
-    else if(selection.getElementsByClassName('radio3')[0].checked){type = 3;}
+    select = selection.getElementsByClassName('type')[0]
+    type = select.options[select.selectedIndex].value;
 
-    if(selection.getElementsByClassName('radio4')[0].checked){role = 1;}       // PLACEHOLDER VALUES
-    else if(selection.getElementsByClassName('radio5')[0].checked){role = 2;}
-    else if(selection.getElementsByClassName('radio6')[0].checked){role = 3;}
+    select = selection.getElementsByClassName('role')[0]
+    role = select.options[select.selectedIndex].value;
+
 
     // adds the information to the form and submits it
     document.forms["addUserForm"].elements["user_name"].value = user_name;
