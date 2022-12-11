@@ -24,6 +24,9 @@ button{
 input{
   text-align: center;
 }
+option{
+  text-align: center;
+}
 #customers {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
