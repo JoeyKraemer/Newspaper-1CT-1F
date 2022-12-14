@@ -7,7 +7,7 @@ function updateRole(id)
     role_description = selection.getElementsByClassName('role_description')[0].innerHTML;
     document.forms["addRoleForm"].elements["role_name"].value = role_name;
     document.forms["addRoleForm"].elements["role_description"].value = role_description;
-    document.forms["addRoleForm"].elements["id"].value = id;
+    document.forms["addRoleForm"].elements["role_id"].value = id;
     document.forms["addRoleForm"].elements["requestType"].value = "editRole";
     document.forms["addRoleForm"].submit();
 
@@ -22,11 +22,11 @@ function updateEvent(id){
     location_city = selection.getElementsByClassName('location_city')[0].innerHTML;
 
     document.forms["addEventForm"].elements["event_id"].value = id;
+    document.forms["addEventForm"].elements["event_name"].value = event_name;
     document.forms["addEventForm"].elements["event_description"].value = event_description;
     document.forms["addEventForm"].elements["location_street"].value = location_street;
     document.forms["addEventForm"].elements["location_postal_code"].value = location_postal_code;
     document.forms["addEventForm"].elements["location_city"].value = location_city;
-    document.forms["addEventForm"].elements["event_name"].value = event_name;
     document.forms["addEventForm"].elements["requestType"].value = "editEvent";
     document.forms["addEventForm"].submit();
 
@@ -60,7 +60,7 @@ function updateUser(id)
     document.forms["addUserForm"].elements["email_address"].value = email_address;
     document.forms["addUserForm"].elements["type_of_staff"].value = type;
     document.forms["addUserForm"].elements["user_role"].value = role;
-    document.forms["addUserForm"].elements["id"].value = id;
+    document.forms["addUserForm"].elements["user_id"].value = id;
     document.forms["addUserForm"].elements["requestType"].value = "editUser";
     document.forms["addUserForm"].submit();
 }

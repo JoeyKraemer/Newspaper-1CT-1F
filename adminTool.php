@@ -5,7 +5,7 @@ $dbname = "webapplication";
 include 'adminPass.php';
 $userLoggedIn = true;
 $permissions = true;
-
+$defaultPass = "user123"; // default pass for all users (they will be asked to change it asap)
 try{
     $handler = new PDO("mysql:host=mysql; dbname=$dbname; charset=utf8", $username, $password);
 }
@@ -25,6 +25,366 @@ catch(Exception $ex){
 </nav>
 
 <?php
+//Data manipulation functionality
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+    $errorMsg = [];
+
+    switch ($_POST["requestType"]) {
+
+        // Roles
+        case 'editRole':
+            $role_id = filter_input(INPUT_POST, 'role_id', FILTER_SANITIZE_NUMBER_INT);
+            if(empty($role_id)){
+                $errorMsg[] = "an id could not be fetched";
+            }
+        //for adding roles and editing roles
+        case 'addRole':
+
+            //role name gets set
+            $role_name = filter_input(INPUT_POST, 'role_name');
+            if($role_name === null || $role_name === false){
+                $errorMsg[] = "something went wrong while fetching the role name";
+            } else {
+                if(preg_match("/[^a-zA-Z\s]/", $role_name)){
+                    $errorMsg[] = "only letters and spaces are allowed";
+                }
+                // if empty, the javascript code returns <br> for some reason
+                if(empty($role_name) || $role_name == "br"){
+                    $errorMsg[] = "a role name is required";
+                }
+                if(strlen($role_name) > 25) {
+                    $errorMsg[] = "only a max of 25 characters is allowed for the role name";
+                }
+                $andCond="";
+                if(isset($role_id)){
+                    $andCond="AND NOT role_id = $role_id";
+                }
+                $stmt = $handler->prepare("SELECT role_name FROM `Roles` WHERE role_name = :role_name $andCond");
+                $stmt->bindParam('role_name', $role_name, PDO::PARAM_STR);
+                $stmt->execute();
+                if (count($stmt->fetchAll()) != 0){
+                    $errorMsg[] = "that name has already been used";
+                }
+            }
+
+            //role description gets set
+            $role_description = filter_input(INPUT_POST, 'role_description', FILTER_SANITIZE_SPECIAL_CHARS);
+            if ($role_description === null || $role_description === false) {
+                $errorMsg[] = "something went wrong";
+            } else {
+                // when leaving the text box blank and using javascript:updateRole(id), for some reason it returns <br> to role_description
+                if (empty($role_description) || $role_description == "&#60;br&#62;"){
+                    $errorMsg[] = "a role description is required";
+                }
+            }
+
+            //counting errors
+            echo "<div class=errormessage>";
+            if(!count($errorMsg) == 0){
+                foreach($errorMsg as $msg){
+                    echo "$msg <br/>";
+                }
+                break;
+            }
+            echo "</div>";
+
+            //pushing changes
+            if (isset($role_id)){
+                $stmt = $handler->prepare("UPDATE `Roles` SET role_name = :role_name, role_description = :role_description WHERE role_id = :role_id");
+                $stmt->bindParam("role_id", $role_id, PDO::PARAM_INT);
+            } else {
+                $stmt = $handler->prepare("INSERT INTO `Roles` (role_name, role_description) VALUES (:role_name, :role_description)");
+
+            }
+            $stmt->bindParam("role_name", $role_name, PDO::PARAM_STR);
+            $stmt->bindParam("role_description", $role_description, PDO::PARAM_STR);
+            $stmt->execute();
+
+            break;
+
+        // Events
+        case 'editEvent':
+
+            $event_id = filter_input(INPUT_POST, 'event_id', FILTER_SANITIZE_NUMBER_INT);
+            if(empty($event_id)){
+                $errorMsg[] = "an id could not be fetched";
+            }
+
+        case 'addEvent':
+
+            //event name gets set
+            $event_name = filter_input(INPUT_POST, 'event_name');
+            if ($event_name === null || $event_name === false) {
+                $errorMsg[] = "something went wrong while fetching the event name";
+            } elseif (empty($event_name) || $event_name == "<br>") {
+                $errorMsg[] = "an event name is required";
+            } else {
+                if(preg_match("/[^a-zA-Z\s]/", $event_name)){
+                    $errorMsg[] = "only letters and spaces are allowed for the event name";
+                }
+                if (strlen($event_name) > 70) {
+                    $errorMsg[] = "only a max of 70 characters is allowed for the event name";
+                }
+                $andCond = "";
+                if (isset($event_id)) {
+                    $andCond = "AND NOT event_id = $event_id";
+                }
+                $stmt = $handler->prepare("SELECT event_name FROM `Event` WHERE event_name = :event_name $andCond");
+                $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
+                $stmt->execute();
+                if (count($stmt->fetchAll()) != 0) {
+                    $errorMsg[] = "that name has already been used";
+                }
+            }
+
+
+
+            // event description gets set
+            $event_description = filter_input(INPUT_POST, 'event_description', FILTER_SANITIZE_SPECIAL_CHARS);
+            if ($event_description === null || $event_description === false) {
+                $errorMsg[] = "something went wrong";
+            } else {
+                // when leaving the text box blank and using javascript:updateRole(id), for some reason it returns <br> to event_description
+                if (empty($event_description) || $event_description == "&#60;br&#62;") {
+                    $errorMsg[] = "a role description is required";
+                }
+            }
+
+            // street name gets set
+            $location_street = filter_input(INPUT_POST, 'location_street');
+            if($location_street === null || $location_street === false){
+                $errorMsg[] = "something went wrong while fetching the street location";
+            }
+            else if(empty($location_street) || $location_street == "<br>"){
+                $location_street = null;
+            } else {
+                if(preg_match("/[^a-zA-Z1-9\s]/", $location_street)){
+                    $errorMsg[] = "only letters, numbers and spaces are allowed for the street name";
+                }
+                if(strlen($location_street) > 50){
+                    $errorMsg[] = "the street name only allows a max of 50 characters";
+                }
+            }
+
+            // postal code gets set
+            $location_postal_code = filter_input(INPUT_POST, 'location_postal_code');
+            if(empty($location_postal_code) || $location_postal_code == '<br>') {
+            $location_postal_code = null;
+            } else {
+                if (!preg_match('/^\d{4}\w{2}$/', $location_postal_code)) {
+                    $errorMsg[] = "a valid (dutch) postal code is required with the format NNNNLL";
+                }
+            }
+
+            // city name gets set
+            $location_city = filter_input(INPUT_POST, 'location_city');
+            if ($location_city === null || $location_city === false) {
+                $errorMsg[] = "something went wrong while fetching the city location";
+            }
+            elseif(empty($location_city)||$location_city == "br") {
+                $location_city = null;
+            } else {
+                if(preg_match("/[^a-zA-Z1-9\s]/", $location_city)){
+                    $errorMsg[] = "only letters, number and spaces are allowed for the city name";
+                }
+                if (strlen($location_city) > 30) {
+                    $errorMsg[] = "the city name only allows a max of 30 characters";
+                }
+            }
+
+            // counting errors
+            echo "<div class=errormessage>";
+            if(!count($errorMsg) == 0){
+                foreach($errorMsg as $msg){
+                    echo "$msg <br/>";
+                }
+                break;
+            }
+            echo "</div>";
+
+            // pushing changes
+            if(isset($event_id)){
+                $stmt = $handler->prepare('UPDATE `Event` SET 
+                event_name = :event_name, 
+                event_description = :event_description, 
+                location_street = :location_street, 
+                location_postal_code = :location_postal_code, 
+                location_city = :location_city 
+                WHERE event_id = :event_id');
+                $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
+            } else {
+                $stmt = $handler->prepare('INSERT INTO `Event`
+                (event_name, event_description, location_street, location_postal_code, location_city, claimed) VALUES
+                (:event_name, :event_description, :location_street, :location_postal_code, :location_city, 0)
+                ');
+            }
+            $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
+            $stmt->bindParam('event_description', $event_description, PDO::PARAM_STR);
+            $stmt->bindParam('location_street', $location_street, ($location_postal_code ? PDO::PARAM_STR : PDO::PARAM_NULL));
+            $stmt->bindParam('location_postal_code', $location_postal_code, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
+            $stmt->bindParam('location_city', $location_city, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
+            $stmt->execute();
+            break;
+
+        // Users
+        case 'editUser':
+            $user_id = filter_input(INPUT_POST, 'user_id', FILTER_SANITIZE_NUMBER_INT);
+            if(empty($user_id)){
+                $errorMsg[] = "an id could not be fetched";
+            }
+
+        case 'addUser':
+
+            // username gets set
+            $user_name = filter_input(INPUT_POST, 'user_name');
+            if($user_name === null || $user_name === false){
+                $errorMsg[] = "something went wrong while fetching the user name";
+            }elseif(empty($user_name) || $user_name == "<br>") {
+                $errorMsg[] = "a user name is required";
+            } elseif (preg_match("/[^a-zA-Z1-9\s]/", $user_name)) {
+                $errorMsg[] = "only letters, numbers and spaces are allowed for the username";
+            } else {
+                if(strlen($user_name) > 25) {
+                    $errorMsg[] = "only a max of 25 characters is allowed for the username";
+                }
+                $andCond="";
+                if(isset($user_id)){
+                    $andCond="AND NOT user_id = $user_id";
+                }
+                $stmt = $handler->prepare("SELECT user_name FROM `User` WHERE user_name = :user_name $andCond");
+                $stmt->bindParam('user_name', $user_name, PDO::PARAM_STR);
+                $stmt->execute();
+                if (count($stmt->fetchAll()) != 0){
+                    $errorMsg[] = "that name has already been used";
+                }
+            }
+
+            // first name gets set
+            $first_name = filter_input(INPUT_POST, 'first_name');
+            if($first_name === null || $first_name === false) {
+                $errorMsg[] = "something went wrong while fetching the first name";
+            } elseif (empty($first_name) || $first_name == '<br>') {
+                $errorMsg[] = "first name must be filled in";
+            } else {
+                if(preg_match("/[^a-zA-Z\s]/", $first_name)){
+                    $errorMsg[] = "only (standard) letters and spaces are allowed in the first name";
+                }
+                if(strlen($first_name) > 25){
+                    $errorMsg[] = "first name may only be a max of 25 characters";
+                }
+            }
+
+            // last name gets set
+            $last_name = filter_input(INPUT_POST, 'last_name');
+            if($last_name === null || $last_name === false) {
+                $errorMsg[] = "something went wrong while fetching the last name";
+            } elseif (empty($last_name) || $last_name == '<br>') {
+                $errorMsg[] = "last name must be filled in";
+            } else {
+                if(preg_match("/[^a-zA-Z\s]/", $last_name)){
+                    $errorMsg[] = "only (standard) letters and spaces are allowed in the last name";
+                }
+                if(strlen($last_name) > 25){
+                    $errorMsg[] = "last name may only be a max of 25 characters";
+                }
+            }
+
+            // email gets set
+            $email_address = filter_input(INPUT_POST, 'email_address');
+            if($email_address === null || $email_address === false) {
+                $errorMsg[] = "something went wrong while fetching the email address";
+            } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                $errorMsg[] = "the email address you have provided is incorrect";
+            } elseif (strlen($email_address) > 50) {
+                $errorMsg[] = "email may not be more than 50 characters";
+            }
+                $andCond = "";
+                if (isset($user_id)) {
+                    $andCond = "AND NOT user_id = $user_id";
+                }
+                $stmt = $handler->prepare("SELECT email_address FROM `User` WHERE email_address = :email_address $andCond");
+                $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
+                $stmt->execute();
+                if (count($stmt->fetchAll()) != 0) {
+                    $errorMsg[] = "that email has already been used";
+                }
+
+            // type gets set
+            $type_of_staff = filter_input(INPUT_POST, 'type_of_staff');
+            if($type_of_staff === null || $type_of_staff === false){
+                $errorMsg[] = "something went wrong while fetching staff type";
+            } elseif (!filter_var($type_of_staff, FILTER_VALIDATE_INT)) {
+                $errorMsg[] = "type of staff seems to have been tampered with";
+            } else {
+                $stmt = $handler->prepare("SELECT type_of_staff_id FROM `TypesOfStaff` WHERE type_of_staff_id = :type_of_staff");
+                $stmt->bindParam("type_of_staff", $type_of_staff, PDO::PARAM_INT);
+                $stmt->execute();
+                if(count($stmt->fetchAll()) != 1){
+                    $errorMsg[] = "the type of staff is out of bounds";
+                }
+            }
+
+            // role gets set
+            $user_role = filter_input(INPUT_POST, 'user_role');
+            if($user_role === null || $user_role === false){
+                $errorMsg[] = "something went wrong while fetching the user role";
+            } elseif (!filter_var($user_role, FILTER_VALIDATE_INT)) {
+                $errorMsg[] = "user role seems to have been tampered with";
+            } else {
+                $stmt = $handler->prepare("SELECT role_id FROM `Roles` WHERE role_id = :user_role");
+                $stmt->bindParam("user_role", $user_role, PDO::PARAM_INT);
+                $stmt->execute();
+                if(count($stmt->fetchAll()) != 1){
+                    $errorMsg[] = "the user role is out of bounds";
+                }
+            }
+
+            // counting errors
+            echo "<div class=errormessage>";
+            if(!count($errorMsg) == 0){
+                foreach($errorMsg as $msg){
+                    echo "$msg <br/>";
+                }
+                break;
+            }
+
+            if(isset($user_id)){
+                $stmt = $handler->prepare('UPDATE `User` SET
+                user_name = :user_name,
+                first_name = :first_name,
+                last_name = :last_name,
+                email_address = :email_address,
+                type_of_staff = :type_of_staff,
+                user_role = :user_role
+                WHERE user_id = :user_id');
+                $stmt->bindParam('user_id', $user_id);
+            } else {
+                $stmt = $handler->prepare('INSERT INTO `User`
+                (user_name, user_password, password_change_date, first_name, last_name, email_address, type_of_staff, user_role) VALUES
+                (:user_name, :user_password, (NOW()), :first_name, :last_name, :email_address, :type_of_staff, :user_role)
+                ');
+                $hashedPass = password_hash($password, PASSWORD_BCRYPT);
+                $stmt->bindParam('user_password', $hashedPass, PDO::PARAM_STR);
+            }
+
+            $stmt->bindParam('user_name', $user_name, PDO::PARAM_STR);
+            $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
+            $stmt->bindParam('last_name', $last_name, PDO::PARAM_STR);
+            $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
+            $stmt->bindParam('type_of_staff', $type_of_staff, PDO::PARAM_INT);
+            $stmt->bindParam('user_role', $user_role, PDO::PARAM_INT);
+            $stmt->execute();
+
+            break;
+
+
+        default:
+            echo("something went wrong while fetching requestType");
+            break;
+    }
+}
+
+
 //show functionality
 if($userLoggedIn && $permissions) { // get amount of entries to show
 
@@ -140,10 +500,10 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     
                     <h2>add role</h2>
                     <form id='addRoleForm' action='{$returnLink}' method='post'>
-                    <input type='hidden' name='id' value='null'/>
+                    <input type='hidden' name='role_id' value='null'/>
                     <label>Name: <input type='text' name='role_name'/></label> <br/>
                     <label>Description: <textarea name='role_description'></textarea></label> <br/>
-                    <input type='hidden' name='requestType' value='createRole'/>
+                    <input type='hidden' name='requestType' value='addRole'/>
                     <input type='submit' value='add'/>
                     </form>
                 ";
@@ -222,7 +582,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     <label>street: <input type='text' name='location_street'/></label> <br/>
                     <label>postal code: <input type='text' name='location_postal_code'/></label> <br/>
                     <label>city: <input type='text' name='location_city'/></label> <br/>
-                    <input type='hidden' name='requestType' value='createEvent'/>
+                    <input type='hidden' name='requestType' value='addEvent'/>
                     <input type='submit' value = 'add'/>
                     </form>
                 ";
@@ -327,7 +687,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     
                     <h2>add user</h2>
                     <form id='addUserForm' action='{$returnLink}' method='post'>
-                    <input type='hidden' name='id' value='null'/>
+                    <input type='hidden' name='user_id' value='null'/>
                     <label>username:<input type='text' name='user_name'></label><br/>
                     <label>first name:<input type='text' name='first_name'></label><br/>
                     <label>last name:<input type='text' name='last_name'></label><br/>
@@ -348,7 +708,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 }
                 echo "
                     </select> <br/>
-                    <input type='hidden' name='requestType' value='createUser'/>
+                    <input type='hidden' name='requestType' value='addUser'/>
                     <input type='submit' value='add'/>
                     </form>
                 ";
@@ -400,9 +760,8 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                 break;
         }
     }
-
-
 }
+$handler = null;
 
 ?>
 
