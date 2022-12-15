@@ -28,7 +28,7 @@ catch(Exception $ex){
 //Data manipulation functionality
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     $errorMsg = [];
-
+    $deleteFlag = 0; // admin can remove roles/ events/ users if they change all fields to empty
     switch ($_POST["requestType"]) {
 
         // Roles
@@ -44,13 +44,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $role_name = filter_input(INPUT_POST, 'role_name');
             if($role_name === null || $role_name === false){
                 $errorMsg[] = "something went wrong while fetching the role name";
+            } elseif (empty($role_name) || $role_name == "<br>") {
+                // if input is empty, the javascript code returns <br> for some reason
+                $errorMsg[] = "a role name is required";
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z\s]/", $role_name)){
                     $errorMsg[] = "only letters and spaces are allowed";
-                }
-                // if empty, the javascript code returns <br> for some reason
-                if(empty($role_name) || $role_name == "br"){
-                    $errorMsg[] = "a role name is required";
                 }
                 if(strlen($role_name) > 25) {
                     $errorMsg[] = "only a max of 25 characters is allowed for the role name";
@@ -75,7 +75,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 // when leaving the text box blank and using javascript:updateRole(id), for some reason it returns <br> to role_description
                 if (empty($role_description) || $role_description == "&#60;br&#62;"){
                     $errorMsg[] = "a role description is required";
+                    $deleteFlag++;
                 }
+            }
+
+            //if nothing is filled in while in edit mode, will delete the entry
+            if($deleteFlag == 2 && isset($role_id)){
+
+                //edge case protection for when attempting to remove role already assigned to user
+                $stmt = $handler->prepare("SELECT user_id FROM `User` WHERE user_role = :role_id");
+                $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
+                $stmt->execute();
+
+                if (count($stmt->fetchAll()) != 0){
+                    echo "you cannot delete this role since an user has it assigned to them";
+                } else {
+                    $stmt = $handler->prepare("DELETE FROM `Roles` WHERE role_id = :role_id");
+                    $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
+                    $stmt->execute();
+                    echo "entry has been successfully deleted <br/>";
+                }
+                break;
             }
 
             //counting errors
@@ -118,6 +138,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $errorMsg[] = "something went wrong while fetching the event name";
             } elseif (empty($event_name) || $event_name == "<br>") {
                 $errorMsg[] = "an event name is required";
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z\s]/", $event_name)){
                     $errorMsg[] = "only letters and spaces are allowed for the event name";
@@ -142,21 +163,19 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // event description gets set
             $event_description = filter_input(INPUT_POST, 'event_description', FILTER_SANITIZE_SPECIAL_CHARS);
             if ($event_description === null || $event_description === false) {
-                $errorMsg[] = "something went wrong";
-            } else {
-                // when leaving the text box blank and using javascript:updateRole(id), for some reason it returns <br> to event_description
-                if (empty($event_description) || $event_description == "&#60;br&#62;") {
-                    $errorMsg[] = "a role description is required";
-                }
+                $errorMsg[] = "something went wrong while fetching the event description";
+            } elseif (empty($event_description) || $event_description == "&#60;br&#62;") {
+                $errorMsg[] = "a role description is required";
+                $deleteFlag++;
             }
 
             // street name gets set
             $location_street = filter_input(INPUT_POST, 'location_street');
             if($location_street === null || $location_street === false){
                 $errorMsg[] = "something went wrong while fetching the street location";
-            }
-            else if(empty($location_street) || $location_street == "<br>"){
+            } else if(empty($location_street) || $location_street == "<br>"){
                 $location_street = null;
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z1-9\s]/", $location_street)){
                     $errorMsg[] = "only letters, numbers and spaces are allowed for the street name";
@@ -168,28 +187,41 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             // postal code gets set
             $location_postal_code = filter_input(INPUT_POST, 'location_postal_code');
-            if(empty($location_postal_code) || $location_postal_code == '<br>') {
-            $location_postal_code = null;
+            if($location_postal_code === null || $location_street === false){
+                $errorMsg[] = "something went wrong while fetching the postal code";
+            } elseif(empty($location_postal_code) || $location_postal_code == '<br>') {
+                $location_postal_code = null;
+                $deleteFlag++;
             } else {
                 if (!preg_match('/^\d{4}\w{2}$/', $location_postal_code)) {
-                    $errorMsg[] = "a valid (dutch) postal code is required with the format NNNNLL";
+                    $errorMsg[] = "a valid (dutch) postal code is required with the format NNNNAA";
                 }
             }
 
             // city name gets set
             $location_city = filter_input(INPUT_POST, 'location_city');
+            echo $location_city;
             if ($location_city === null || $location_city === false) {
                 $errorMsg[] = "something went wrong while fetching the city location";
-            }
-            elseif(empty($location_city)||$location_city == "br") {
+            } elseif(empty($location_city)||$location_city == "<br>") {
                 $location_city = null;
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z1-9\s]/", $location_city)){
                     $errorMsg[] = "only letters, number and spaces are allowed for the city name";
                 }
                 if (strlen($location_city) > 30) {
-                    $errorMsg[] = "the city name only allows a max of 30 characters";
+                    $errorMsg[] = "only a max of 30 characters is allowed in the city name";
                 }
+            }
+
+            //if nothing is filled in while in edit mode, will delete the entry
+            if($deleteFlag == 5 && isset($event_id)){
+                $stmt = $handler->prepare("DELETE FROM `Event` WHERE event_id = :event_id");
+                $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
+                $stmt->execute();
+                echo "entry has been successfully deleted <br/>";
+                break;
             }
 
             // counting errors
@@ -241,6 +273,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $errorMsg[] = "something went wrong while fetching the user name";
             }elseif(empty($user_name) || $user_name == "<br>") {
                 $errorMsg[] = "a user name is required";
+                $deleteFlag++;
             } elseif (preg_match("/[^a-zA-Z1-9\s]/", $user_name)) {
                 $errorMsg[] = "only letters, numbers and spaces are allowed for the username";
             } else {
@@ -265,6 +298,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $errorMsg[] = "something went wrong while fetching the first name";
             } elseif (empty($first_name) || $first_name == '<br>') {
                 $errorMsg[] = "first name must be filled in";
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z\s]/", $first_name)){
                     $errorMsg[] = "only (standard) letters and spaces are allowed in the first name";
@@ -280,6 +314,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $errorMsg[] = "something went wrong while fetching the last name";
             } elseif (empty($last_name) || $last_name == '<br>') {
                 $errorMsg[] = "last name must be filled in";
+                $deleteFlag++;
             } else {
                 if(preg_match("/[^a-zA-Z\s]/", $last_name)){
                     $errorMsg[] = "only (standard) letters and spaces are allowed in the last name";
@@ -293,6 +328,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $email_address = filter_input(INPUT_POST, 'email_address');
             if($email_address === null || $email_address === false) {
                 $errorMsg[] = "something went wrong while fetching the email address";
+            } else if (empty($email_address) || $email_address == '<br>') {
+                $errorMsg[] = "email address must be filled in";
+                $deleteFlag++;
             } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
                 $errorMsg[] = "the email address you have provided is incorrect";
             } elseif (strlen($email_address) > 50) {
@@ -314,7 +352,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             if($type_of_staff === null || $type_of_staff === false){
                 $errorMsg[] = "something went wrong while fetching staff type";
             } elseif (!filter_var($type_of_staff, FILTER_VALIDATE_INT)) {
-                $errorMsg[] = "type of staff seems to have been tampered with";
+                $errorMsg[] = "type of staff does not seem to be a number";
             } else {
                 $stmt = $handler->prepare("SELECT type_of_staff_id FROM `TypesOfStaff` WHERE type_of_staff_id = :type_of_staff");
                 $stmt->bindParam("type_of_staff", $type_of_staff, PDO::PARAM_INT);
@@ -329,7 +367,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             if($user_role === null || $user_role === false){
                 $errorMsg[] = "something went wrong while fetching the user role";
             } elseif (!filter_var($user_role, FILTER_VALIDATE_INT)) {
-                $errorMsg[] = "user role seems to have been tampered with";
+                $errorMsg[] = "user role does not seem to be a number";
             } else {
                 $stmt = $handler->prepare("SELECT role_id FROM `Roles` WHERE role_id = :user_role");
                 $stmt->bindParam("user_role", $user_role, PDO::PARAM_INT);
@@ -337,6 +375,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 if(count($stmt->fetchAll()) != 1){
                     $errorMsg[] = "the user role is out of bounds";
                 }
+            }
+
+            //if nothing is filled in while in edit mode, will delete the entry
+            if($deleteFlag == 4 && isset($user_id)){
+                $stmt = $handler->prepare("DELETE FROM `User` WHERE user_id = :user_id");
+                $stmt->bindParam('user_id', $user_id, PDO::PARAM_INT);
+                $stmt->execute();
+                echo "entry has been successfully deleted <br/>";
+                break;
             }
 
             // counting errors
@@ -407,6 +454,7 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
     if(isset($_GET['view'])){
         $view = $_GET['view'];
         $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}";
+
 
         // shows the users database
         switch ($view) {
@@ -495,8 +543,14 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     ";
                 }
 
+                $stmt = $handler->prepare("SELECT count(role_id) FROM `Roles`");
+                $stmt-> execute();
+                $result = $stmt->fetch();
+
                 echo "
                     </table>
+                    <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                    <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
                     
                     <h2>add role</h2>
                     <form id='addRoleForm' action='{$returnLink}' method='post'>
@@ -572,8 +626,15 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     ";
                 }
 
+                $stmt = $handler->prepare("SELECT count(event_id) FROM `Event`");
+                $stmt-> execute();
+                $result = $stmt->fetch();
+
                 echo "
                     </table>
+                    <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                    <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                    
                     <h2>add event</h2>
                     <form id='addEventForm' action='{$returnLink}' method='post'>
                     <input type='hidden' name='event_id' value='null'/>
@@ -681,9 +742,15 @@ if($userLoggedIn && $permissions) { // get amount of entries to show
                     ";
                 }
 
+                $stmt = $handler->prepare("SELECT count(user_id) FROM `User`");
+                $stmt-> execute();
+                $result = $stmt->fetch();
+
                 // creates the "add new user" form (this also serves as the form for modifying users)
                 echo "
                     </table>
+                    <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                    <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
                     
                     <h2>add user</h2>
                     <form id='addUserForm' action='{$returnLink}' method='post'>
