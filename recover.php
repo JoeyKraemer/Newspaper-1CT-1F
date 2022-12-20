@@ -18,7 +18,7 @@
             <p> Please enter the required information and follow the instructions sent to your inbox for resetting your password </p>
 
             <!-- form -->
-            <form action="#" method="POST">  
+            <form action="actionrecover.php" method="POST">  
             <input type="email” name="email" id="email" placeholder="Email">
             <input type="text" name="idNumber" id="idNumber" placeholder="Employee ID Number">
 
