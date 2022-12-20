@@ -1,11 +1,8 @@
 -- Please import this statement to your database via PHPmyAdmin
-
 DROP DATABASE IF EXISTS `webapplication`;
 -- Create database change value in ` ` to your needs 
 CREATE DATABASE IF NOT EXISTS `webapplication` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-SET FOREIGN_KEY_CHECKS=0;
 use webapplication;
-
 
 -- Table TypesOfStaff
 CREATE TABLE `TypesOfStaff` (
@@ -27,17 +24,17 @@ CREATE TABLE `Event` (
    event_id INT AUTO_INCREMENT NOT NULL,
    event_name VARCHAR(70) UNIQUE NOT NULL,
    event_description TEXT NOT NULL,
-   location_street VARCHAR(50),
-   location_postal_code VARCHAR(6),
-   location_city VARCHAR(30),
-   event_time TIME,
-   event_date DATE,
+   location_street VARCHAR(50) NOT NULL,
+   location_postal_code VARCHAR(6) NOT NULL,
+   location_city VARCHAR(30) NOT NULL,
+   event_time TIME NOT NULL,
+   event_date DATE NOT NULL,
+   event_max_participant INT NOT NULL,
    inactive BOOLEAN,
    PRIMARY KEY(event_id)
 );
 
 -- Table User
-
 CREATE TABLE `User` (
    user_id INT AUTO_INCREMENT NOT NULL,
    user_password VARCHAR(60) NOT NULL,
@@ -63,4 +60,3 @@ CREATE TABLE `Event_Details` (
    FOREIGN KEY(event_id) REFERENCES Event(event_id) ON UPDATE CASCADE ON DELETE NO ACTION,
    FOREIGN KEY(user_id) REFERENCES User(user_id) ON UPDATE CASCADE ON DELETE NO ACTION
 );
-SET FOREIGN_KEY_CHECKS=1;
