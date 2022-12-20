@@ -1,13 +1,13 @@
 @font-face {
-    font-family: 'Inter';
-    src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
+font-family: 'Inter';
+src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
 }
 
 body {
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);
-	background-color:#B2BCBC;
-	font-family: Inter;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    background-color:#B2BCBC;
+    font-family: Inter;
 }
 nav{
     grid-column: 2/4;
@@ -18,48 +18,48 @@ main{
     background-color: #FFFF;
 }
 button{
-  background-color: #FFFF;
-  border: 0px;
+    background-color: #FFFF;
+    border: 0px;
 }
 input{
-  text-align: center;
+    text-align: center;
 }
 option{
-  text-align: center;
+    text-align: center;
 }
 
 #customers {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
 }
 
 #customers td, #customers th {
-  border: px solid #ddd;
-  padding: 8px;
+    border: px solid #ddd;
+    padding: 8px;
 }
 
 .parent {
-   margin: 20px 20px 20px 20px;
+    margin: 20px 20px 20px 20px;
     text-align: left;
     background-color: #F1F1F1;
 }
 
 .Addusertab {
-  text-align: center;
+    text-align: center;
 }
 
 .tableheader{
-  display: inline-block;
-  padding: 1rem 1rem;
-  border: 0px solid red;
-  vertical-align: middle;
-  background-color: #FFFF;
+    display: inline-block;
+    padding: 1rem 1rem;
+    border: 0px solid red;
+    vertical-align: middle;
+    background-color: #FFFF;
 }
 
 th, td, tr {
-  padding:8px;
-  text-align: center;
-  border-bottom: 2px solid #B2BCBC;
-  border-top: 1px solid #B2BCBC;
+    padding:8px;
+    text-align: center;
+    border-bottom: 2px solid #B2BCBC;
+    border-top: 1px solid #B2BCBC;
 }
