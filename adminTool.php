@@ -10,12 +10,11 @@
         <?php
         //placeholders
         $dbname = "webapplication";
-        include 'adminPass.php';
         $userLoggedIn = true;
         $permissions = true;
         $defaultPass = "user123"; // default pass for all users (they will be asked to change it asap)
         try{
-            $handler = new PDO("mysql:host=mysql; dbname=$dbname; charset=utf8", $username, $password);
+            $handler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
         }
         catch(Exception $ex){
             print $ex;
