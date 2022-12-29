@@ -1,6 +1,3 @@
--- Please import this statement to your database via PHPmyAdmin
-
--- Create database change value in ` ` to your needs 
 CREATE DATABASE IF NOT EXISTS `webapplication` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 SET FOREIGN_KEY_CHECKS=0;
 use webapplication;
