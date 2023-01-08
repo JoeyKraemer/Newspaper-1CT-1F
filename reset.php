@@ -13,7 +13,7 @@
         
             <h1> Gemorskos Intranet </h1>
             
-<?php
+<?php /*
 $selector = $_GET["selector"];
 $validator = $_GET["validator"];
 
@@ -21,7 +21,7 @@ $validator = $_GET["validator"];
 if (empty($selector) || empty($validator)) {
     echo "We couldn't validate your request!";
 } else {
-    if (ctype_xdigit($selector) !== false && (ctype_xdigit($validator) !== false) {
+    if (ctype_xdigit($selector) !== false && (ctype_xdigit($validator) !== false) { */
 ?>
 
             <p> Welcome back. Please enter your new password and go back to login. </p>

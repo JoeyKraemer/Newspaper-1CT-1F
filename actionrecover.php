@@ -1,23 +1,4 @@
-<?php /*
- 
-session_start();
-// connection file
-
- $DB_host = "localhost";
-$DB_user = "root";
-$DB_pass = "qwerty";
-$DB_name = "";
-
-try
-{
-     $DB_con = new PDO("mysql:host={$DB_host};dbname={$DB_name}",$DB_user,$DB_pass);
-     $DB_con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-}
-catch(PDOException $e)
-{
-     echo $e->getMessage();
-}
-*/
+<?php
 
 if(isset($_POST["reset-request-submit"])) {
     
@@ -60,26 +41,38 @@ if(isset($_POST["reset-request-submit"])) {
     mysqli_stmt_close($stmt);
     mysqli_close($conn);
     
-    //sending the email
-    $to = $userEmail;
+    //sending the email using php mailer
+    include_once 'PHPmailer/src/Exception.php'; 
+    include_once 'PHPmailer/src/PHPMailer.php';
+    include_once 'PHPmailer/src/SMTP.php';
+    
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->SMTPAuth = true;
+    $mail->SMTPSecure = 'ssl';
+    $mail->Host = 'smtp.gmail.com';
+    $mail->Port = '465';
+    
+    $mail->isTHML(true);
+    $mail->Username = 'gemorskosnews@gmail.com';
+    $mail->Password = '5uU1on46Ydvt';
+    
+    //mail is sent from 
+    $mail->SetFrom('no-reply@gemorskos.nl');
+    
+    //mail is sent to:
+    $mail->addAddress($userEmail);
     
     //the subject of the mail user receives
-    $subject = 'Reset your password for Gemorskos';
+    $mail->Subject = 'Reset your password for Gemorskos';
     
     //the mail user receives
-    $message = '<p> We received a password reset request. The link to reset your password is below. If you did not make this request, you can ignore this email. </p>';
-    $message .='<p> Here is your password reset link: <br>';
-    $message .='<a href="'.$url.'">' .$url.' </a></p>';
+    $mail->Body = '<p> We received a password reset request. The link to reset your password is below. If you did not make this request, you can ignore this email. </p>
+    <p> Here is your password reset link: <br> <a href="'.$url.'">' .$url.' </a></p>';
     
-    //info sent with the email
-    $headers = "From: Gemorskos <germoskos@gmail.com>\r\n";
-    $headers .= "Repy-To: germoskos@gmail.com\r\n";
-    $headers .= "Content-typeL text/html\r\n";
-    
-    mail($to, $subject, $message, $headers); //this function requires a working mail server running  
-    
-    header("Location: recover.php?reset=success");
-    
+    if ($mail->Send()) { 
+        header("Location: recover.php?reset=success");
+    } 
     
 } else {
     header("Location: login.php");
