@@ -1,5 +1,14 @@
 <?php
 
+    //Include required PHPMailer files
+	require 'includes/PHPMailer.php';
+	require 'includes/SMTP.php';
+	require 'includes/Exception.php';
+    //Define name spaces
+	use PHPMailer\PHPMailer\PHPMailer;
+	use PHPMailer\PHPMailer\SMTP;
+	use PHPMailer\PHPMailer\Exception;
+
 if(isset($_POST["reset-request-submit"])) {
     
     $selector = bin2hex(random_bytes(8));
@@ -41,34 +50,25 @@ if(isset($_POST["reset-request-submit"])) {
     mysqli_stmt_close($stmt);
     mysqli_close($conn);
     
-    //sending the email using php mailer
-    include_once 'PHPmailer/src/Exception.php'; 
-    include_once 'PHPmailer/src/PHPMailer.php';
-    include_once 'PHPmailer/src/SMTP.php';
-    
-    $mail = new PHPMailer(true);
-    $mail->isSMTP();
-    $mail->SMTPAuth = true;
-    $mail->SMTPSecure = 'ssl';
-    $mail->Host = 'smtp.gmail.com';
-    $mail->Port = '465';
-    
-    $mail->isTHML(true);
-    $mail->Username = 'gemorskosnews@gmail.com';
-    $mail->Password = '5uU1on46Ydvt';
-    
-    //mail is sent from 
-    $mail->SetFrom('no-reply@gemorskos.nl');
-    
-    //mail is sent to:
-    $mail->addAddress($userEmail);
-    
-    //the subject of the mail user receives
-    $mail->Subject = 'Reset your password for Gemorskos';
+    //sending the email using php mailer    
+	$mail = new PHPMailer();
+	$mail->isSMTP();
+	$mail->Host = "smtp.gmail.com";
+	$mail->SMTPAuth = true;
+	$mail->SMTPSecure = "tls";
+	$mail->Port = "587";
+	$mail->Username = "gemorskosnews@gmail.com";
+	$mail->Password = "frwumimtviqgjzgt";
+	$mail->Subject = "Reset your password for Gemorskos";
+	$mail->setFrom('gemorskosnews@gmail.com');
+	$mail->isHTML(true);
     
     //the mail user receives
     $mail->Body = '<p> We received a password reset request. The link to reset your password is below. If you did not make this request, you can ignore this email. </p>
     <p> Here is your password reset link: <br> <a href="'.$url.'">' .$url.' </a></p>';
+    
+    //mail is sent to:
+    $mail->addAddress($userEmail);
     
     if ($mail->Send()) { 
         header("Location: recover.php?reset=success");
