@@ -29,8 +29,8 @@ CREATE TABLE `Events` (
    location_city VARCHAR(30),
    event_time TIME,
    event_date DATE,
-   event_max_participant INT NOT NULL,
-   inactive BOOLEAN,
+   event_max_participant INT,
+   active BOOLEAN,
    PRIMARY KEY(event_id)
 );
 
