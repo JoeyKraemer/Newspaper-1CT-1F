@@ -8,7 +8,7 @@
     </head>
     <body>
         <?php
-        //placeholders
+        //placeholder
         $dbname = "webapplication";
         $userLoggedIn = true;
         $permissions = true;
@@ -437,6 +437,11 @@
         //show functionality
         if($userLoggedIn && $permissions) { // get amount of entries to show
 
+            $view = "";
+            if(isset($_GET["view"])){
+                $view = filter_input(INPUT_GET, 'view', FILTER_SANITIZE_SPECIAL_CHARS);
+            }
+
             $show = 25;  // default of 25 entries
             if (isset($_GET["show"])) {
                 if (is_numeric($_GET["show"])) {
@@ -452,10 +457,24 @@
             }
             $offset = (($page - 1) * $show);
 
+            if(isset($_GET['search'])){
+                $search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_SPECIAL_CHARS);
+            }
+
+            echo "
+            <br/>
+            <form action='adminTool.php' method='get'>
+                <input type='hidden' name='view' value=$view>
+                <input type='hidden' name='show' value=$show>
+                <input type='hidden' name='page' value=$page>
+                <input type='text' name='search' placeholder='search'/>
+                <input type='submit'/>
+            </form>
+            ";
 
             if(isset($_GET['view'])){
                 $view = $_GET['view'];
-                $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}";
+                $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}" . (isset($search)?"&page={$search}":"");
 
 
                 // shows the users database
@@ -471,8 +490,13 @@
                             }
                         }
 
+                        $where = "";
+                        if(isset($search)){
+                            $where = " WHERE type_of_staff_description LIKE '%{$search}%'";
+                        }
+
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -518,8 +542,13 @@
                             }
                         }
 
+                        $where = "";
+                        if(isset($search)){
+                            $where = " WHERE role_name LIKE '%{$search}%' OR role_description LIKE '%{$search}%'";
+                        }
+
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles` ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -593,8 +622,17 @@
                             }
                         }
 
+                        $where = "";
+                        if(isset($search)){
+                            $items = ['event_description', 'location_street', 'location_postal_code', 'location_city'];
+                            $where = " WHERE event_name LIKE '%{$search}%'";
+                            foreach($items as $item){
+                                $where .= " OR $item LIKE '%{$search}%'";
+                            }
+                        }
+
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, claimed  FROM `Event` ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, claimed  FROM `Event`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -686,8 +724,17 @@
                             }
                         }
 
+                        $where = "";
+                        if(isset($search)){
+                            $items = ['first_name', 'last_name', 'email_address', 'type_of_staff', 'user_role'];
+                            $where = " WHERE user_name LIKE '%{$search}%'";
+                            foreach($items as $item){
+                                $where .= " OR $item LIKE '%{$search}%'";
+                            }
+                        }
+
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT user_id, user_name, password_change_date, first_name, last_name, email_address, type_of_staff, user_role  FROM `User` ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT user_id, user_name, password_change_date, first_name, last_name, email_address, type_of_staff, user_role  FROM `User`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -803,6 +850,11 @@
                             }
                         }
 
+                        $where = "";
+                        if(isset($search)){
+                            $where = "WHERE event_details_id=$search OR event_id=$search OR user_id=$search";
+                        }
+
                         $stmt = $handler->prepare("SELECT event_details_id, event_id, user_id  FROM `Event_Details` ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
@@ -830,8 +882,6 @@
                         }
 
                         echo "</table>";
-
-                        break;
                 }
             }
         }
