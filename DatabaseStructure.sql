@@ -1,8 +1,8 @@
 -- Please import this statement to your database via PHPmyAdmin
-DROP DATABASE IF EXISTS `webapplication`;
+DROP DATABASE IF EXISTS `gemorskos`;
 -- Create database change value in ` ` to your needs 
-CREATE DATABASE IF NOT EXISTS `webapplication` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-use webapplication;
+CREATE DATABASE IF NOT EXISTS `gemorskos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+use gemorskos;
 
 -- Table TypesOfStaff
 CREATE TABLE `TypesOfStaff` (
@@ -20,22 +20,22 @@ CREATE TABLE `Roles` (
 );
 
 -- Table Event
-CREATE TABLE `Event` (
+CREATE TABLE `Events` (
    event_id INT AUTO_INCREMENT NOT NULL,
    event_name VARCHAR(70) UNIQUE NOT NULL,
    event_description TEXT NOT NULL,
-   location_street VARCHAR(50) NOT NULL,
-   location_postal_code VARCHAR(6) NOT NULL,
-   location_city VARCHAR(30) NOT NULL,
-   event_time TIME NOT NULL,
-   event_date DATE NOT NULL,
+   location_street VARCHAR(50),
+   location_postal_code VARCHAR(6),
+   location_city VARCHAR(30),
+   event_time TIME,
+   event_date DATE,
    event_max_participant INT NOT NULL,
    inactive BOOLEAN,
    PRIMARY KEY(event_id)
 );
 
 -- Table User
-CREATE TABLE `User` (
+CREATE TABLE `Users` (
    user_id INT AUTO_INCREMENT NOT NULL,
    user_password VARCHAR(60) NOT NULL,
    password_change_date TIMESTAMP,
@@ -44,7 +44,7 @@ CREATE TABLE `User` (
    email_address VARCHAR(50) UNIQUE NOT NULL,
    type_of_staff INT NOT NULL,
    user_role INT NOT NULL,
-   inactive BOOLEAN,
+   active BOOLEAN,
    PRIMARY KEY(user_id),
    FOREIGN KEY(type_of_staff) REFERENCES TypesOfStaff(type_of_staff_id) ON UPDATE CASCADE ON DELETE NO ACTION,
    FOREIGN KEY(user_role) REFERENCES Roles(role_id) ON UPDATE CASCADE ON DELETE NO ACTION
