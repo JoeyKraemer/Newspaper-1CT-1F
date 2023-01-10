@@ -7,24 +7,26 @@
 </head>
 <body>
     <div id="container">
-
         <main>
-        <div id="content">
-        
-            <h1> Gemorskos Intranet </h1>
-            
-            <p> Please enter the required information and follow the instructions sent to your inbox for resetting your password </p>
-
-            <form action="loginProcess.php" method="POST">  
-            <input type="email" name="email" id="email" placeholder="Email">
-            <input type="password" name="pass" id="pass" placeholder="Password">
-
-            <input type="submit" id="submit" value="Log In"> 
-            </form>
-
-            <a href="recover.php"> Forgot your password? </a>
-            
-        </div>		
+            <div id="content">
+                <h1> Gemorskos Intranet </h1>
+                <p> Please enter the required information and follow the instructions sent to your inbox for resetting your password </p>
+                <form action="loginProcess.php" method="POST">  
+                    <input type="email" name="email" id="email" placeholder="Email">
+                    <input type="password" name="pass" id="pass" placeholder="Password">
+                    <input type="submit" id="submit" value="Log In"> 
+                </form>
+                <a href="recover.php"> Forgot your password? </a>  
+<?php
+if($wrong = filter_input(INPUT_GET,"retry")) {
+    if ($wrong == TRUE) {
+    ?>
+        <p id="retryPhrase">Your username or your password is incorrect</p>
+    <?php
+    } 
+}
+?>
+            </div>
         </main>
     </div>
 </body>

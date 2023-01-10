@@ -4,7 +4,6 @@ session_start();
 if($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = filter_input(INPUT_POST,"email",FILTER_VALIDATE_EMAIL);
     $password = filter_input(INPUT_POST,"pass");
-    //var_dump($password);
     $dbname = "gemorskos";
     try {
         $dbhandler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
@@ -26,13 +25,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             Header("Location:index.php");
         }
         else{
-            include "login.php";
-            echo '<script type="text/javascript">window.onload = function () { alert("Your Password is incorrect"); }</script>';
+            Header("Location:login.php?retry=TRUE");
+            //include "login.php?password=wrong";
         }
     }
     else {
-        include "login.php";
-        echo '<script type="text/javascript">window.onload = function () { alert("Your username doesnt exist"); }</script>';
+        Header("Location:login.php?retry=TRUE");
+       // include "login.php?username=wrong";
     }
 }
 else {
