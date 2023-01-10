@@ -9,7 +9,7 @@
     <body>
         <?php
         //placeholder
-        $dbname = "webapplication";
+        $dbname = "gemorskos";
         $userLoggedIn = true;
         $permissions = true;
         $defaultPass = "user123"; // default pass for all users (they will be asked to change it asap)
@@ -23,8 +23,8 @@
         <nav>
             <a href="adminTool.php?view=TypesOfStaff">Staff Types</a> <br/>
             <a href="adminTool.php?view=Roles">Roles</a> <br/>
-            <a href="adminTool.php?view=Event">Events</a> <br/>
-            <a href="adminTool.php?view=User">Users</a> <br/>
+            <a href="adminTool.php?view=Events">Events</a> <br/>
+            <a href="adminTool.php?view=Users">Users</a> <br/>
             <a href="adminTool.php?view=EventDetails">Event details</a> <br/>
         </nav>
 
@@ -85,7 +85,7 @@
                     if($deleteFlag == 2 && isset($role_id)){
 
                         //edge case protection for when attempting to remove role already assigned to user
-                        $stmt = $handler->prepare("SELECT user_id FROM `User` WHERE user_role = :role_id");
+                        $stmt = $handler->prepare("SELECT user_id FROM `Users` WHERE user_role = :role_id");
                         $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
                         $stmt->execute();
 
@@ -148,16 +148,6 @@
                         if (strlen($event_name) > 70) {
                             $errorMsg[] = "only a max of 70 characters is allowed for the event name";
                         }
-                        $andCond = "";
-                        if (isset($event_id)) {
-                            $andCond = "AND NOT event_id = $event_id";
-                        }
-                        $stmt = $handler->prepare("SELECT event_name FROM `Event` WHERE event_name = :event_name $andCond");
-                        $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
-                        $stmt->execute();
-                        if (count($stmt->fetchAll()) != 0) {
-                            $errorMsg[] = "that name has already been used";
-                        }
                     }
 
 
@@ -216,9 +206,40 @@
                         }
                     }
 
+                    // event time gets set
+                    $event_time = filter_input(INPUT_POST, 'event_time');
+                    if ($event_time === null || $event_time === false){
+                        $errorMsg[] = "something went wrong while fetching the event time";
+                    } elseif(empty($event_time)) {
+                        $event_time = null;
+                        $deleteFlag++;
+                    }
+
+                    // event date gets set
+                    $event_date = filter_input(INPUT_POST, 'event_date');
+                    if ($event_date === null || $event_date === false){
+                        $errorMsg[] = "something went wrong while fetching the event date";
+                    } elseif(empty($event_date)) {
+                        $event_date = null;
+                        $deleteFlag++;
+                    }
+
+                    //event max participant gets set, removed errors due to conflict with empty input
+                    $event_max_participant = filter_input(INPUT_POST, 'event_max_participant', FILTER_VALIDATE_INT);
+                    if($event_max_participant === null || $event_max_participant === false){
+                        $event_max_participant = null;
+                        $deleteFlag++;
+                    }
+
+                    // active status gets set
+                    $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
+                    if($active === null){
+                        $active = 0;
+                    }
+
                     //if nothing is filled in while in edit mode, will delete the entry
-                    if($deleteFlag == 5 && isset($event_id)){
-                        $stmt = $handler->prepare("DELETE FROM `Event` WHERE event_id = :event_id");
+                    if($deleteFlag == 8 && isset($event_id)){
+                        $stmt = $handler->prepare("DELETE FROM `Events` WHERE event_id = :event_id");
                         $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
                         $stmt->execute();
                         echo "entry has been successfully deleted <br/>";
@@ -237,25 +258,33 @@
 
                     // pushing changes
                     if(isset($event_id)){
-                        $stmt = $handler->prepare('UPDATE `Event` SET 
+                        $stmt = $handler->prepare('UPDATE `Events` SET 
                         event_name = :event_name, 
                         event_description = :event_description, 
                         location_street = :location_street, 
                         location_postal_code = :location_postal_code, 
-                        location_city = :location_city 
+                        location_city = :location_city,
+                        event_time = :event_time,
+                        event_date = :event_date,
+                        event_max_participant = :event_max_participant,
+                        active = :active
                         WHERE event_id = :event_id');
                         $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
                     } else {
-                        $stmt = $handler->prepare('INSERT INTO `Event`
-                        (event_name, event_description, location_street, location_postal_code, location_city, claimed) VALUES
-                        (:event_name, :event_description, :location_street, :location_postal_code, :location_city, 0)
+                        $stmt = $handler->prepare('INSERT INTO `Events`
+                        (event_name, event_description, location_street, location_postal_code, location_city, event_time, event_date, event_max_participant, active) VALUES
+                        (:event_name, :event_description, :location_street, :location_postal_code, :location_city, :event_time, :event_date, :event_max_participant, :active)
                         ');
                     }
                     $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
                     $stmt->bindParam('event_description', $event_description, PDO::PARAM_STR);
-                    $stmt->bindParam('location_street', $location_street, ($location_postal_code ? PDO::PARAM_STR : PDO::PARAM_NULL));
+                    $stmt->bindParam('location_street', $location_street, ($location_street ? PDO::PARAM_STR : PDO::PARAM_NULL));
                     $stmt->bindParam('location_postal_code', $location_postal_code, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('location_city', $location_city, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
+                    $stmt->bindParam('location_city', $location_city, ($location_city? PDO::PARAM_STR : PDO::PARAM_NULL));
+                    $stmt->bindParam('event_time', $event_time, ($event_time? PDO::PARAM_STR : PDO::PARAM_NULL));
+                    $stmt->bindParam('event_date', $event_date, ($event_date? PDO::PARAM_STR : PDO::PARAM_NULL));
+                    $stmt->bindParam('event_max_participant', $event_max_participant, ($event_max_participant? PDO::PARAM_INT : PDO::PARAM_NULL));
+                    $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
                     $stmt->execute();
                     break;
 
@@ -267,31 +296,6 @@
                     }
 
                 case 'addUser':
-
-                    // username gets set
-                    $user_name = filter_input(INPUT_POST, 'user_name');
-                    if($user_name === null || $user_name === false){
-                        $errorMsg[] = "something went wrong while fetching the user name";
-                    }elseif(empty($user_name)) {
-                        $errorMsg[] = "a user name is required";
-                        $deleteFlag++;
-                    } elseif (preg_match("/[^a-zA-Z1-9\s]/", $user_name)) {
-                        $errorMsg[] = "only letters, numbers and spaces are allowed for the username";
-                    } else {
-                        if(strlen($user_name) > 25) {
-                            $errorMsg[] = "only a max of 25 characters is allowed for the username";
-                        }
-                        $andCond="";
-                        if(isset($user_id)){
-                            $andCond="AND NOT user_id = $user_id";
-                        }
-                        $stmt = $handler->prepare("SELECT user_name FROM `User` WHERE user_name = :user_name $andCond");
-                        $stmt->bindParam('user_name', $user_name, PDO::PARAM_STR);
-                        $stmt->execute();
-                        if (count($stmt->fetchAll()) != 0){
-                            $errorMsg[] = "that name has already been used";
-                        }
-                    }
 
                     // first name gets set
                     $first_name = filter_input(INPUT_POST, 'first_name');
@@ -341,7 +345,7 @@
                         if (isset($user_id)) {
                             $andCond = "AND NOT user_id = $user_id";
                         }
-                        $stmt = $handler->prepare("SELECT email_address FROM `User` WHERE email_address = :email_address $andCond");
+                        $stmt = $handler->prepare("SELECT email_address FROM `Users` WHERE email_address = :email_address $andCond");
                         $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
                         $stmt->execute();
                         if (count($stmt->fetchAll()) != 0) {
@@ -378,6 +382,12 @@
                         }
                     }
 
+                    // active status gets set
+                    $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
+                    if($active === null){
+                        $active = 0;
+                    }
+
                     //if nothing is filled in while in edit mode, will delete the entry
                     if($deleteFlag == 4 && isset($user_id)){
                         $stmt = $handler->prepare("DELETE FROM `User` WHERE user_id = :user_id");
@@ -398,30 +408,30 @@
                     }
 
                     if(isset($user_id)){
-                        $stmt = $handler->prepare('UPDATE `User` SET
-                        user_name = :user_name,
+                        $stmt = $handler->prepare('UPDATE `Users` SET
                         first_name = :first_name,
                         last_name = :last_name,
                         email_address = :email_address,
                         type_of_staff = :type_of_staff,
-                        user_role = :user_role
+                        user_role = :user_role,
+                        active = :active
                         WHERE user_id = :user_id');
                         $stmt->bindParam('user_id', $user_id);
                     } else {
-                        $stmt = $handler->prepare('INSERT INTO `User`
-                        (user_name, user_password, password_change_date, first_name, last_name, email_address, type_of_staff, user_role) VALUES
-                        (:user_name, :user_password, (NOW()), :first_name, :last_name, :email_address, :type_of_staff, :user_role)
+                        $stmt = $handler->prepare('INSERT INTO `Users`
+                        (user_password, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active) VALUES
+                        (:user_password, (NOW()), :first_name, :last_name, :email_address, :type_of_staff, :user_role, :active)
                         ');
-                        $hashedPass = password_hash($password, PASSWORD_BCRYPT);
+                        $hashedPass = password_hash($defaultPass, PASSWORD_BCRYPT);
                         $stmt->bindParam('user_password', $hashedPass, PDO::PARAM_STR);
                     }
 
-                    $stmt->bindParam('user_name', $user_name, PDO::PARAM_STR);
                     $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
                     $stmt->bindParam('last_name', $last_name, PDO::PARAM_STR);
                     $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
                     $stmt->bindParam('type_of_staff', $type_of_staff, PDO::PARAM_INT);
                     $stmt->bindParam('user_role', $user_role, PDO::PARAM_INT);
+                    $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
                     $stmt->execute();
 
                     break;
@@ -599,7 +609,7 @@
                         break;
 
                     // show Events page
-                    case 'Event':
+                    case 'Events':
 
                         $sort = 'event_id';
                         if (isset($_GET["sort"])){
@@ -619,6 +629,15 @@
                                 case 'city':
                                     $sort = 'location_city';
                                     break;
+                                case 'date':
+                                    $sort = 'event_date';
+                                    break;
+                                case 'time':
+                                    $sort = 'event_time';
+                                    break;
+                                case 'max':
+                                    $sort = 'event_max_participant';
+                                    break;
                             }
                         }
 
@@ -632,7 +651,7 @@
                         }
 
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, claimed  FROM `Event`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, event_date, event_time, event_max_participant, active  FROM `Events`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -648,13 +667,20 @@
                                     <th> <a href='{$returnLink}&sort=street'>Street</a> </th>
                                     <th> <a href='{$returnLink}&sort=code'>Postal Code</a> </th>
                                     <th> <a href='{$returnLink}&sort=city'>City</a> </th>
-                                    <th> claimed? </th>
+                                    <th> <a href='{$returnLink}&sort=date'>Date</a> </th>
+                                    <th> <a href='{$returnLink}&sort=time'>Time</a> </th>
+                                    <th> <a href='{$returnLink}&sort=max'>Max participants</a> </th>
+                                    <th> active </th>
                                     <th> Edit </th>
                                 <tr/>
                             ";
 
                         // adds the events to the table
                         foreach ($result as $entry) {
+                            $active = '';
+                            if($entry['active']){
+                                $active = 'checked';
+                            }
                             echo "
                                 <tr class='{$entry['event_id']}'>
                                     <td> {$entry['event_id']} </td>
@@ -663,13 +689,16 @@
                                     <td> <div contenteditable class = 'location_street'>{$entry['location_street']}</div> </td>
                                     <td> <div contenteditable class = 'location_postal_code'>{$entry['location_postal_code']}</div> </td>
                                     <td> <div contenteditable class = 'location_city'>{$entry['location_city']}</div> </td>
-                                    <td> <div class = 'claimed'>". ($entry['claimed']?'yes':'no') ."</div> </td>
+                                    <td> <input type='date' class='event_date' value='{$entry['event_date']}'></input></td>
+                                    <td> <input type='time' class='event_time' value='{$entry['event_time']}'></input></td>
+                                    <td> <div contenteditable class = 'event_max_participant'>{$entry['event_max_participant']}</div> </td>
+                                    <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
                                     <td> <a href='javascript:updateEvent({$entry['event_id']})'> save changes </a> </td>
                                 </tr>
                             ";
                         }
 
-                        $stmt = $handler->prepare("SELECT count(event_id) FROM `Event`");
+                        $stmt = $handler->prepare("SELECT count(event_id) FROM `Events`");
                         $stmt-> execute();
                         $result = $stmt->fetch();
 
@@ -686,6 +715,10 @@
                             <label>street: <input type='text' name='location_street'/></label> <br/>
                             <label>postal code: <input type='text' name='location_postal_code'/></label> <br/>
                             <label>city: <input type='text' name='location_city'/></label> <br/>
+                            <label>date: <input type='date' name='event_date'/></label> <br/>
+                            <label>time: <input type='time' name='event_time'/></label> <br/>
+                            <label>max participants: <input type='number' name='event_max_participant'/></label> <br/>
+                            <label>active?: <input type='checkbox' name='active' checked='true'/></label> <br/>
                             <input type='hidden' name='requestType' value='addEvent'/>
                             <input type='submit' value = 'add'/>
                             </form>
@@ -695,14 +728,11 @@
                         break;
 
                     // show User page
-                    case 'User':
+                    case 'Users':
 
                         $sort = 'user_id';
                         if (isset($_GET["sort"])){
                             switch ($_GET["sort"]) {
-                                case 'name':
-                                    $sort = 'user_name';
-                                    break;
                                 case 'date':
                                     $sort = 'password_change_date';
                                     break;
@@ -726,15 +756,15 @@
 
                         $where = "";
                         if(isset($search)){
-                            $items = ['first_name', 'last_name', 'email_address', 'type_of_staff', 'user_role'];
-                            $where = " WHERE user_name LIKE '%{$search}%'";
+                            $items = ['last_name', 'email_address', 'type_of_staff', 'user_role'];
+                            $where = " WHERE first_name LIKE '%{$search}%'";
                             foreach($items as $item){
                                 $where .= " OR $item LIKE '%{$search}%'";
                             }
                         }
 
                         // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT user_id, user_name, password_change_date, first_name, last_name, email_address, type_of_staff, user_role  FROM `User`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("SELECT user_id, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active  FROM `Users`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -744,18 +774,22 @@
                         $stmt->execute();
                         $roles = $stmt->fetchAll();
 
+                        $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY type_of_staff_id ASC");
+                        $stmt->execute();
+                        $types = $stmt->fetchAll();
+
                         echo "
                             <h1>Users</h1>
                             <table>
                                 <tr>
                                     <th> <a href='{$returnLink}&sort=id'>ID</a> </th>
-                                    <th> <a href='{$returnLink}&sort=name'>Username</a> </th>
                                     <th> <a href='{$returnLink}&sort=date'>Password Change Date</a> </th>
                                     <th> <a href='{$returnLink}&sort=first'>First Name</a> </th>
                                     <th> <a href='{$returnLink}&sort=last'>Last Name</a> </th>
                                     <th> <a href='{$returnLink}&sort=email'>Email Address</a> </th>
                                     <th> <a href='{$returnLink}&sort=type'>Account Type</a> </th>
                                     <th> <a href='{$returnLink}&sort=role'>User Role</a> </th>
+                                    <th> active </th>
                                     <th> Edit </th>
                                 <tr/>
                                 ";
@@ -766,16 +800,19 @@
                                 <tr class='{$entry['user_id']}'>
                                     <form> <!-- form added to prevent radio buttons from influencing other users -->
                                         <td> {$entry['user_id']} </td>
-                                        <td> <div contenteditable class='user_name'>{$entry['user_name']}</div> </td>
                                         <td> <div class='password_change_date'>{$entry['password_change_date']}</div> </td>
                                         <td> <div contenteditable class = 'first_name'>{$entry['first_name']}</div> </td>
                                         <td> <div contenteditable class = 'last_name'>{$entry['last_name']}</div> </td>
                                         <td> <div contenteditable class = 'email_address'>{$entry['email_address']}</div> </td>
                                         <td>
-                                            <select class='type' autocomplete='off'>
-                                                <option value='1' " . (($entry['type_of_staff'] == 1) ? "selected" : '') . ">manager</option>
-                                                <option value='2' " . (($entry['type_of_staff'] == 2) ? "selected" : '') . ">in-house</option>
-                                                <option value='3' " . (($entry['type_of_staff'] == 3) ? "selected" : '') . ">freelancer</option>
+                                            <select class='type' autocomplete='off'>";
+
+                            // dynamically adds types of staff
+                            foreach($types as $type){
+                                echo "<option value='{$type['type_of_staff_id']}'" . (($entry['type_of_staff'] == $type['type_of_staff_id']) ? "selected" : '') . ">{$type['type_of_staff_description']}</option>";
+                            }
+
+                            echo "
                                             </select>
                                         </td>
                                         <td>
@@ -786,18 +823,26 @@
                             foreach($roles as $role){
                                 echo "<option value='{$role['role_id']}'" . (($entry['user_role'] == $role['role_id']) ? "selected" : '') . ">{$role['role_name']}</option>";
                             }
+
+                            $active = '';
+                            if($entry['active']){
+                                $active = 'checked';
+                            }
+
                             echo "
                                             </select>
                                         </td>
+                                        <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
                                         <td> <a href='javascript:updateUser({$entry['user_id']})'> save changes </a> </td>
                                     </form>
                                 </tr>
                             ";
                         }
 
-                        $stmt = $handler->prepare("SELECT count(user_id) FROM `User`");
+                        $stmt = $handler->prepare("SELECT count(user_id) FROM `Users`");
                         $stmt-> execute();
                         $result = $stmt->fetch();
+
 
                         // creates the "add new user" form (this also serves as the form for modifying users)
                         echo "
@@ -808,15 +853,19 @@
                             <h2>add user</h2>
                             <form id='addUserForm' action='{$returnLink}' method='post'>
                             <input type='hidden' name='user_id' value='null'/>
-                            <label>username:<input type='text' name='user_name'></label><br/>
                             <label>first name:<input type='text' name='first_name'></label><br/>
                             <label>last name:<input type='text' name='last_name'></label><br/>
                             <label>email adress:</label><input type='text' name='email_address'></label><br/>
                             <label>user type: </label> <br/>
                             <select name='type_of_staff' autocomplete='off'>
-                                <option value='1'>manager</option>
-                                <option value='2'>in-house</option>
-                                <option value='3' selected>freelancer</option>
+                            ";
+
+                        // dynamically adds types of staff
+                        foreach($types as $type){
+                            echo "<option value='{$type['type_of_staff_id']}'>{$type['type_of_staff_description']}</option>";
+                        }
+
+                            echo "
                             </select> <br/>
                             <label>user role:</label> <br/>
                             <select name='user_role' autocomplete='off'>
@@ -826,8 +875,10 @@
                         foreach($roles as $role){
                             echo "<option value='{$role['role_id']}'>{$role['role_name']}</option>";
                         }
+
                         echo "
                             </select> <br/>
+                            <label>active?: <input type='checkbox' name='active' checked='true'/></label> <br/>
                             <input type='hidden' name='requestType' value='addUser'/>
                             <input type='submit' value='add'/>
                             </form>
