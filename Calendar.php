@@ -6,7 +6,9 @@
     <link type="text/css" rel="stylesheet" href="CalendarCSS.css">
     <link type="text/css" rel="stylesheet" href="normalize.css">
     <title>Title</title>
+    <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 </head>
+<body>
 
 <div id="container">
 
@@ -19,55 +21,114 @@
 
 <div id="calendar">
     <div id="dateAndEvents">
-        <div id="date"><span style="font-size: 3em;">22</span><h3>November <br> 2022</h3></div>
+        <div id="date"><span style="font-size: 3em;" id="calendarDate">10</span><h3>January <br> 2023</h3></div>
         <div class="eventList">
             <u>Upcoming Events</u>
+            <div id = "Events"> <span style="..." id="EventsData">-</span><li>-</li></div>
             <ul>Local Festival</ul>
-                <li>10:00-18:00</li>
-                <li>Event info</<li>
-        <br>
+                <div id = "Festival"> <span style="..." id="FestivalDate">-</span><li>-</li></div>
+                <div id = "Festival"> <span style="..." id="FestivalInfo">-</span><li>-</li></div>
+
+            <br>
         <u>My Schedule</u>
         <ul>Local Festival</ul>
             <li>10:00-18:00</li>
             <li>Event info</li>
         </div>
     </div>
-    <div id="daysAndWeeks">
-        <table>
-            <tr>
-                <th>S</th>
-                <th>M</th>
-                <th>T</th>
-                <th>W</th>
-                <th>T</th>
-                <th>F</th>
-                <th>S</th>
-            </tr>
-            <?
+    <table border='0' >
+        <?php
+        $date = getdate();
 
-            echo "<tr>";
-            for ($i = 1; $i<=30; $i++) {
-                echo "<td>$i</td>";
-                if ($i % 7 == 0) {
-                    echo "</tr><tr>";
-                }
-                if ($i == 30) {
-                    for ($j=0;$j<5;$j++) {
-                        echo "<td></td>";
-                    }
-                    echo "</tr>";
-                }
+        $mday = $date['mday'];
+        $mon = $date['mon'];
+        $wday = $date['wday'];
+        $month = $date['month'];
+        $year = $date['year'];
+
+
+        $dayCount = $wday;
+        $day = $mday;
+
+        while($day > 0) {
+            $days[$day--] = $dayCount--;
+            if($dayCount < 0)
+                $dayCount = 6;
+        }
+
+        $dayCount = $wday;
+        $day = $mday;
+
+        if(checkdate($mon,31,$year))
+            $lastDay = 31;
+        elseif(checkdate($mon,30,$year))
+            $lastDay = 30;
+        elseif(checkdate($mon,29,$year))
+            $lastDay = 29;
+        elseif(checkdate($mon,28,$year))
+            $lastDay = 28;
+
+        while($day <= $lastDay) {
+            $days[$day++] = $dayCount++;
+            if($dayCount > 6)
+                $dayCount = 0;
+        }
+
+        // Days to highlight
+        $day_to_highlight = array(8, 9, 10, 11, 12, 22,23,24,25,26);
+
+        echo("<tr>");
+        echo("</tr>");
+        echo("<tr>");
+        echo("<td class='red bg-yellow'>Sun</td>");
+        echo("<td class='bg-yellow'>Mon</td>");
+        echo("<td class='bg-yellow'>Tue</td>");
+        echo("<td class='bg-yellow'>Wed</td>");
+        echo("<td class='bg-yellow'>Thu</td>");
+        echo("<td class='bg-yellow'>Fri</td>");
+        echo("<td class='bg-yellow'>Sat</td>");
+        echo("</tr>");
+
+        $startDay = 0;
+        $d = $days[1];
+
+        echo("<tr>");
+        while($startDay < $d) {
+            echo("<td></td>");
+            $startDay++;
+        }
+
+        for ($d=1;$d<=$lastDay;$d++) {
+            if (in_array( $d, $day_to_highlight))
+                $bg = "bg-green";
+            else
+                $bg = "bg-white";
+            // Highlights the current day
+            if($d == $mday)
+                echo("<td class='bg-blue'><a href='#' title='Detail of day'>$d</a></td>");
+            else
+                echo("<td class='$bg'><a href='#' title='Detail of day'>$d</a></td>");
+
+
+            $startDay++;
+            if($startDay > 6 && $d < $lastDay){
+                $startDay = 0;
+                echo("</tr>");
+                echo("<tr>");
             }
+        }
+        echo("</tr>");
+        ?>
+    </table>
+    </main>
+<script>
+    $('td').on('click', function(){
+        let selecteDate = $(this).data('day');
+        let dateTarget = $('#calendarDate');
 
-            ?>
-        </table>
-    </div>
-</div>
-</main>
-    <footer>
-
-    </footer>
-</div>
+        dateTarget.text(selecteDate)
+    });
+</script>
 </body>
 </html>
 
