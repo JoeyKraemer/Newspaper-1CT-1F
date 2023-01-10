@@ -443,7 +443,6 @@
             }
         }
 
-
         //show functionality
         if($userLoggedIn && $permissions) { // get amount of entries to show
 
@@ -472,14 +471,18 @@
             }
 
             echo "
-            <br/>
-            <form action='adminTool.php' method='get'>
-                <input type='hidden' name='view' value=$view>
-                <input type='hidden' name='show' value=$show>
-                <input type='hidden' name='page' value=$page>
-                <input type='text' name='search' placeholder='search'/>
-                <input type='submit'/>
-            </form>
+            <div id='main'>
+                <div id='main2'>
+                    <div id='searchbar'>
+                        <br/>
+                        <form action='adminTool.php' method='get'>
+                            <input type='hidden' name='view' value=$view>
+                            <input type='hidden' name='show' value=$show>
+                            <input type='hidden' name='page' value=$page>
+                            <input type='text' name='search' placeholder='search'/>
+                            <input type='submit'/>
+                        </form>
+                    </div>
             ";
 
             if(isset($_GET['view'])){
@@ -592,14 +595,16 @@
 
                         echo "
                             </table>
-                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            <div id='pageNav'>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            </div>
                             
                             <h2>add role</h2>
                             <form id='addRoleForm' action='{$returnLink}' method='post'>
                             <input type='hidden' name='role_id' value='null'/>
-                            <label>Name: <input type='text' name='role_name'/></label> <br/>
-                            <label>Description: <textarea name='role_description'></textarea></label> <br/>
+                            <label>Name: </label><input type='text' name='role_name'/> <br/>
+                            <label>Description: </label><textarea name='role_description'></textarea> <br/>
                             <input type='hidden' name='requestType' value='addRole'/>
                             <input type='submit' value='add'/>
                             </form>
@@ -704,21 +709,23 @@
 
                         echo "
                             </table>
-                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            <div id='pageNav'>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            </div>
                             
                             <h2>add event</h2>
                             <form id='addEventForm' action='{$returnLink}' method='post'>
                             <input type='hidden' name='event_id' value='null'/>
-                            <label>event name: <input type='text' name='event_name'/></label> <br/>
-                            <label>event description: <textarea name='event_description'></textarea></label> <br/>
-                            <label>street: <input type='text' name='location_street'/></label> <br/>
-                            <label>postal code: <input type='text' name='location_postal_code'/></label> <br/>
-                            <label>city: <input type='text' name='location_city'/></label> <br/>
-                            <label>date: <input type='date' name='event_date'/></label> <br/>
-                            <label>time: <input type='time' name='event_time'/></label> <br/>
-                            <label>max participants: <input type='number' name='event_max_participant'/></label> <br/>
-                            <label>active?: <input type='checkbox' name='active' checked='true'/></label> <br/>
+                            <label>event name: </label><input type='text' name='event_name'/> <br/>
+                            <label>event description: </label><textarea name='event_description'></textarea> <br/>
+                            <label>street: </label><input type='text' name='location_street'/> <br/>
+                            <label>postal code: </label><input type='text' name='location_postal_code'/> <br/>
+                            <label>city: </label><input type='text' name='location_city'/> <br/>
+                            <label>date: </label><input type='date' name='event_date'/> <br/>
+                            <label>time: </label><input type='time' name='event_time'/> <br/>
+                            <label>max participants: </label><input type='number' name='event_max_participant'/> <br/>
+                            <label>active?: </label><input type='checkbox' name='active' checked='true'/> <br/>
                             <input type='hidden' name='requestType' value='addEvent'/>
                             <input type='submit' value = 'add'/>
                             </form>
@@ -847,16 +854,18 @@
                         // creates the "add new user" form (this also serves as the form for modifying users)
                         echo "
                             </table>
-                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            <div id='pageNav'>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            </div>
                             
                             <h2>add user</h2>
                             <form id='addUserForm' action='{$returnLink}' method='post'>
                             <input type='hidden' name='user_id' value='null'/>
-                            <label>first name:<input type='text' name='first_name'></label><br/>
-                            <label>last name:<input type='text' name='last_name'></label><br/>
-                            <label>email adress:</label><input type='text' name='email_address'></label><br/>
-                            <label>user type: </label> <br/>
+                            <label>first name:</label><input type='text' name='first_name'>
+                            <label>last name:</label><input type='text' name='last_name'>
+                            <label>email adress:</label><input type='text' name='email_address'>
+                            <label>user type: </label>
                             <select name='type_of_staff' autocomplete='off'>
                             ";
 
@@ -866,8 +875,8 @@
                         }
 
                             echo "
-                            </select> <br/>
-                            <label>user role:</label> <br/>
+                            </select>
+                            <label>user role:</label>
                             <select name='user_role' autocomplete='off'>
                             ";
 
@@ -877,8 +886,8 @@
                         }
 
                         echo "
-                            </select> <br/>
-                            <label>active?: <input type='checkbox' name='active' checked='true'/></label> <br/>
+                            </select>
+                            <label>active?: </label><input type='checkbox' name='active' checked='true'/>
                             <input type='hidden' name='requestType' value='addUser'/>
                             <input type='submit' value='add'/>
                             </form>
@@ -932,10 +941,22 @@
                             ";
                         }
 
-                        echo "</table>";
+                        $stmt = $handler->prepare("SELECT count(event_details_id) FROM `Event_Details`");
+                        $stmt-> execute();
+                        $result = $stmt->fetch();
+                        echo "
+                            </table>
+                            <div id='pageNav'>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                            </div>
+                    ";
                 }
+
             }
         }
+        echo "    </div>
+            </div>";
         $handler = null;
 
         ?>
