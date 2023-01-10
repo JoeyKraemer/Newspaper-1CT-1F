@@ -504,7 +504,7 @@
                         }
 
                         $where = "";
-                        if(isset($search)){
+                        if(isset($search) AND $search){
                             $where = " WHERE type_of_staff_description LIKE '%{$search}%'";
                         }
 
@@ -556,7 +556,7 @@
                         }
 
                         $where = "";
-                        if(isset($search)){
+                        if(isset($search) AND $search){
                             $where = " WHERE role_name LIKE '%{$search}%' OR role_description LIKE '%{$search}%'";
                         }
 
@@ -596,8 +596,8 @@
                         echo "
                             </table>
                             <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
                             </div>
                             
                             <h2>add role</h2>
@@ -647,7 +647,7 @@
                         }
 
                         $where = "";
-                        if(isset($search)){
+                        if(isset($search) AND $search){
                             $items = ['event_description', 'location_street', 'location_postal_code', 'location_city'];
                             $where = " WHERE event_name LIKE '%{$search}%'";
                             foreach($items as $item){
@@ -710,8 +710,8 @@
                         echo "
                             </table>
                             <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
                             </div>
                             
                             <h2>add event</h2>
@@ -762,7 +762,7 @@
                         }
 
                         $where = "";
-                        if(isset($search)){
+                        if(isset($search) AND $search){
                             $items = ['last_name', 'email_address', 'type_of_staff', 'user_role'];
                             $where = " WHERE first_name LIKE '%{$search}%'";
                             foreach($items as $item){
@@ -855,8 +855,8 @@
                         echo "
                             </table>
                             <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
                             </div>
                             
                             <h2>add user</h2>
@@ -907,15 +907,40 @@
                                 case 'user':
                                     $sort = 'user_id';
                                     break;
+                                case 'date':
+                                    $sort = 'checkin_date';
+                                    break;
+                                case 'first_name':
+                                    $sort = 'first_name';
+                                    break;
+                                case 'last_name':
+                                    $sort = 'last_name';
+                                    break;
+                                case 'email':
+                                    $sort = 'email_address';
+                                    break;
                             }
                         }
 
+                        // adds the where statement based on what is filled into the search bar
                         $where = "";
-                        if(isset($search)){
-                            $where = "WHERE event_details_id=$search OR event_id=$search OR user_id=$search";
+                        if(isset($search) AND $search){
+                            $items = ['checkin_date','event_name', 'first_name', 'last_name', 'email_address']; // removed 'Event_Details.event_id', 'Event_Details.user_id' due to inability to specify between numbers
+                            // start of search as well as functionality as a day, and month format search (using the format yyyy-mm-dd)
+                            $where = " WHERE event_details_id LIKE '%{$search}%'
+                            or checkin_date LIKE '{$search}-__ %'
+                            or checkin_date LIKE '{$search} %'";
+                            foreach($items as $item){
+                                $where .= " OR $item LIKE '%{$search}%'";
+                            }
                         }
 
-                        $stmt = $handler->prepare("SELECT event_details_id, event_id, user_id  FROM `Event_Details` ORDER BY $sort LIMIT :show OFFSET :offset");
+                        $stmt = $handler->prepare("
+                            SELECT Event_Details.event_details_id, Event_Details.event_id, Event_Details.user_id, Event_Details.checkin_date, Events.event_name, Users.first_name, Users.last_name, Users.email_address
+                            FROM (`Event_Details` JOIN `Events` ON Event_Details.event_id = Events.event_id INNER JOIN `Users` ON Event_Details.user_id = Users.user_id)
+                            {$where} 
+                            ORDER BY $sort LIMIT :show 
+                            OFFSET :offset");
                         $stmt->bindParam('show', $show, PDO::PARAM_INT);
                         $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
                         $stmt->execute();
@@ -926,8 +951,13 @@
                         <table>
                             <tr>
                                 <th> <a href='{$returnLink}&sort=id'>Event Details ID</a> </th>
-                                <th> <a href='{$returnLink}&sort=event'>Event</a> </th>
-                                <th> <a href='{$returnLink}&sort=user'>User</a> </th>
+                                <th> <a href='{$returnLink}&sort=event_name'>Event Name</a> </th>
+                                <th> <a href='{$returnLink}&sort=first_name'>First Name</a> </th>
+                                <th> <a href='{$returnLink}&sort=last_name'>Last Name</a> </th>
+                                <th> <a href='{$returnLink}&sort=email'>User Email Address</a> </th>
+                                <th> <a href='{$returnLink}&sort=date'>Check-In Date</a></th>
+                                <th> <a href='{$returnLink}&sort=event'>Event ID</a> </th>
+                                <th> <a href='{$returnLink}&sort=user'>User ID</a> </th>
                             </tr>
                         ";
 
@@ -935,8 +965,13 @@
                             echo "
                                 <tr class='{$entry['event_details_id']}'>
                                     <td> {$entry['event_details_id']} </td>
-                                    <td> <div contenteditable class='event'>{$entry['event_id']}</div></td>
-                                    <td> <div contenteditable class='user'>{$entry['user_id']}</div></td>
+                                    <td> <div class='event_name'>{$entry['event_name']}</div></td>
+                                    <td> <div class='first_name'>{$entry['first_name']}</div></td>
+                                    <td> <div class='last_name'>{$entry['last_name']}</div></td>
+                                    <td> <div class='email_address'>{$entry['email_address']}</div></td>
+                                    <td> <input type='timestamp' class='event_date' value='{$entry['checkin_date']}'></input></td>
+                                    <td> <div class='event'>{$entry['event_id']}</div></td>
+                                    <td> <div class='user'>{$entry['user_id']}</div></td>
                                 </tr>
                             ";
                         }
@@ -947,8 +982,8 @@
                         echo "
                             </table>
                             <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page-1 ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". $page+1 ."';\"> next </button>
+                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
                             </div>
                     ";
                 }
