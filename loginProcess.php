@@ -17,7 +17,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->bindColumn("email_address",$dbEmail);
     $stmt->bindColumn("user_password",$dbPassword);
-
     $stmt->fetch();
     if (!is_null($dbEmail)) {
         if (password_verify($password,$dbPassword)) {

@@ -17,16 +17,16 @@
                     <input type="submit" id="submit" value="Log In"> 
                 </form>
                 <a href="recover.php"> Forgot your password? </a>  
-<?php
-if($wrong = filter_input(INPUT_GET,"retry",FILTER_VALIDATE_BOOLEAN)) {
-    var_dump($wrong);
-    if ($wrong === TRUE) {
-    ?>
-        <p id="retryPhrase">Your username or your password is incorrect</p>
-    <?php
-    } 
-}
-?>
+                <?php
+                if($wrong = filter_input(INPUT_GET,"retry",FILTER_VALIDATE_BOOLEAN)) {
+                    var_dump($wrong);
+                    if ($wrong === TRUE) {
+                    ?>
+                    <p id="retryPhrase">Your username or your password is incorrect</p>
+                    <?php
+                    }
+                }
+                ?>
             </div>
         </main>
     </div>
