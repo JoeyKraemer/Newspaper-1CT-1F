@@ -424,6 +424,14 @@
                         ');
                         $hashedPass = password_hash($defaultPass, PASSWORD_BCRYPT);
                         $stmt->bindParam('user_password', $hashedPass, PDO::PARAM_STR);
+
+                        // add personal folder if a new user
+                        $stmt2 = $handler->prepare("SELECT `auto_increment` 
+                        FROM INFORMATION_SCHEMA.TABLES WHERE table_name = 'Users'");
+                        $stmt2->execute();
+                        $auto_increment = $stmt2->fetchAll();
+                        $auto_increment = $auto_increment[0][0];
+                        mkdir("repository/{$auto_increment}_{$first_name}_{$last_name}", 777);
                     }
 
                     $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
