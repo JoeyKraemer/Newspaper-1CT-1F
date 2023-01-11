@@ -1,3 +1,12 @@
+<?php
+    try{
+        $dbHandler = new PDO("mysql:host=mariadb;dbname=gemorskos;charset=utf8", "root", "root");
+    }
+    catch(Exception $ex){
+        echo "The following exception has occurred $ex";
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +17,6 @@
     <title>Title</title>
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script src="js/index.js" defer></script>
 </head>
 <body>
 
@@ -23,19 +31,39 @@
 
         <div id="calendar">
     <div id="dateAndEvents">
-        <div id="date"><span style="font-size: 3em;" id="calendarDate">10</span><h3>January <br> 2023</h3></div>
-        <div class="eventList">
-            <u>Upcoming Events</u>
-            <div id = "Events"> <span style="..." id="EventsData">-</span><li>-</li></div>
-            <ul>Local Festival</ul>
-                <div id = "Festival"> <span style="..." id="FestivalDate">-</span><li>-</li></div>
-                <div id = "Festival"> <span style="..." id="FestivalInfo">-</span><li>-</li></div>
+        <?php
+            if($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET["event_date"])) {
+                echo '<div id="date"><span style="font-size: 3em;" id="calendarDate">' . $_GET["event_date"]. '</span><h3>January <br> 2023</h3></div>';
+            }
+        ?>
 
-            <br>
-        <u>My Schedule</u>
-        <ul>Local Festival</ul>
-            <li>10:00-18:00</li>
-            <li>Event info</li>
+        <div class="eventList">
+            <?php
+            if(isset($dbHandler)){
+                try {
+                    $currDate = "2023-01-" . $_GET['event_date'];
+                    $stmt = $dbHandler->prepare("SELECT * FROM `Events` WHERE event_date = :event_date");
+                    $stmt->bindParam("event_date", $currDate, PDO::PARAM_STR);
+
+                    $stmt->execute();
+                    $value = $stmt->fetch(PDO::FETCH_OBJ);
+                    if ($stmt->rowCount() > 0) {
+                        echo "<br>";
+                        echo "<u>My Schedule</u>";
+                        echo "<ul>" . $value->event_name . "</ul>";
+                        echo "<li>" . $value->event_time . "</li>";
+                        echo "<li>" . $value->event_description . "</li>";
+                    }
+                }
+                catch(Exception $ex){
+                    echo "The following exception has occurred $ex";
+                }
+            }
+            else{
+                echo "No events planned";
+            }
+            ?>
+
         </div>
     </div>
     <table border='0'>
@@ -107,9 +135,9 @@
                 $bg = "bg-white";
             // Highlights the current day
             if($d == $mday)
-                echo("<td class='bg-blue'><a href='#' title='Detail of day'>$d</a></td>");
+                echo("<td class='bg-blue'><a href='?event_date=$d' title='Detail of day'>$d</a></td>");
             else
-                echo("<td class='$bg'><a href='#' title='Detail of day'>$d</a></td>");
+                echo("<td class='$bg'><a href='?event_date=$d' title='Detail of day'>$d</a></td>");
 
 
             $startDay++;
@@ -120,7 +148,7 @@
             }
         }
         echo("</tr>");
-        // TODO: Handle PHP events, buttons for calendar via js, connect with database
+        // TODO: Welcome user, connect header footer
         ?>
     </table>
     </main>
