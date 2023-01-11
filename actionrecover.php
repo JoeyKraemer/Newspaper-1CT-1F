@@ -21,30 +21,30 @@ if(isset($_POST["reset-request-submit"])) {
     $expires = date("U") + 1800;
     
     //connect to database
-    require 'dbh.inc.php';
+    $dbhandler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
     
     $userEmail = $_POST["email"];
     
     //delete any existing token from the same user (if an user tries to get an email sent twice without reseting their pass first)
-    $sql = "DELETE FROM pwdreset WHERE pwdResetEmail=?;";
-    $stmt = mysqli_stmt_init($conn);
-    if (!mysqli_stmt_prepare($stmt, $sql)) {
+    $stmt = "DELETE FROM pwdreset WHERE pwdResetEmail=?;";
+    if (!$stmt) {
         echo "There was an error!";
         exit();
     } else {
-        mysqli_stmt_bind_param($stmt, "s", $userEmail);
-        mysqli_stmt_execute($stmt);
+        $stmt->bindParam($stmt, $userEmail, PDO::PARAM_STR);
+        $stmt->execute();
     }
     
-    $sql = "INSERT INTO pwdReset (pwdResetEmail, pwdResetSelector, pwdResetToken, pwdResetExpires) VALUES (?, ?, ?, ?);";
-    $stmt = mysqli_stmt_init($conn);
-    if (!mysqli_stmt_prepare($stmt, $sql)) {
+    $stmt = $dbhandler->prepare("INSERT INTO pwdReset (pwdResetEmail, pwdResetSelector, pwdResetToken, pwdResetExpires) VALUES (?, ?, ?, ?);");
+    $stmt->execute();
+    
+    if (!$stmt) {
         echo "There was an error!";
         exit();
     } else {
         $hashedToken = password_hash($token, PASSWORD_DEFAULT); //hash the token for security
-        mysqli_stmt_bind_param($stmt, "ssss", $userEmail, $selector, $hashedToken, $expires);
-        mysqli_stmt_execute($stmt);
+        $stmt->bindParam($stmt, $userEmail, $selector, $hashedToken, $expires, PDO::PARAM_STR);
+        $stmt->execute();
     }
     
     mysqli_stmt_close($stmt);
