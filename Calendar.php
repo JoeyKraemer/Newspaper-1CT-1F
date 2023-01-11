@@ -7,6 +7,7 @@
     <link type="text/css" rel="stylesheet" href="normalize.css">
     <title>Title</title>
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 </head>
 <body>
 
@@ -19,7 +20,7 @@
             <h2>Welcome, Firstname</h2>
         </div>
 
-<div id="calendar">
+        <div id="calendar">
     <div id="dateAndEvents">
         <div id="date"><span style="font-size: 3em;" id="calendarDate">10</span><h3>January <br> 2023</h3></div>
         <div class="eventList">
@@ -36,7 +37,7 @@
             <li>Event info</li>
         </div>
     </div>
-    <table border='0' >
+    <table border='0'>
         <?php
         $date = getdate();
 
@@ -80,13 +81,13 @@
         echo("<tr>");
         echo("</tr>");
         echo("<tr>");
-        echo("<td class='red bg-yellow'>Sun</td>");
-        echo("<td class='bg-yellow'>Mon</td>");
-        echo("<td class='bg-yellow'>Tue</td>");
-        echo("<td class='bg-yellow'>Wed</td>");
-        echo("<td class='bg-yellow'>Thu</td>");
-        echo("<td class='bg-yellow'>Fri</td>");
-        echo("<td class='bg-yellow'>Sat</td>");
+        echo("<td>Sun</td>");
+        echo("<td>Mon</td>");
+        echo("<td>Tue</td>");
+        echo("<td>Wed</td>");
+        echo("<td>Thu</td>");
+        echo("<td>Fri</td>");
+        echo("<td>Sat</td>");
         echo("</tr>");
 
         $startDay = 0;
@@ -118,17 +119,12 @@
             }
         }
         echo("</tr>");
+        // TODO: Handle PHP events, buttons for calendar via js, connect with database
         ?>
     </table>
     </main>
-<script>
-    $('td').on('click', function(){
-        let selecteDate = $(this).data('day');
-        let dateTarget = $('#calendarDate');
-
-        dateTarget.text(selecteDate)
-    });
-</script>
+</div>
+<script src="js/index.js"</script>
 </body>
 </html>
 
