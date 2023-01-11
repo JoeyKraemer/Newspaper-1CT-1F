@@ -1,0 +1,7 @@
+#Specific project name
+COMPOSE_PROJECT_NAME="webapplication"
+
+# Environment Variables for database.
+DB_SERVER="webapplication"
+DB_ROOT_USER="root"
+DB_ROOT_PASSWORD="qwerty"
