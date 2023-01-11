@@ -19,7 +19,7 @@ main{
 }
 button{
     background-color: #FFFF;
-    border: 0px;
+    border: 2px;
 }
 input{
     text-align: center;
@@ -47,7 +47,24 @@ option{
 
 .Addusertab {
     text-align: center;
+    
 }
+.Adduserheading{
+    margin-bottom: 40px;
+    margin-top: 20px;
+
+}
+.inputtext{
+    padding: 6px;
+    margin-bottom: 10px;
+
+}
+.inputdropdown{
+    padding: 6px;
+    margin-bottom: 10px;
+    width: 180px;
+}
+
 
 .tableheader{
     display: inline-block;
