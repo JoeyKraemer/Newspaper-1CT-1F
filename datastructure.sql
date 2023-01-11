@@ -60,3 +60,12 @@ CREATE TABLE `Event_Details` (
    FOREIGN KEY(user_id) REFERENCES User(user_id) ON UPDATE CASCADE
 );
 SET FOREIGN_KEY_CHECKS=1;
+
+-- Table pdwReset
+CREATE TABLE pwdReset (
+	pwdResetId int(11) PRIMARY KEY AUTO_INCREMENT NOT NULL,
+	pwdResetEmail TEXT NOT NULL,
+	pwdResetSelector TEXT NOT NULL,
+	pwdResetToken LONGTEXT NOT NULL,
+	pwdResetExpires TEXT NOT NULL
+);
