@@ -3,6 +3,11 @@
     src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
 }
 
+html, body{
+    margin: 0;
+    padding: 0;
+}
+
 body {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -58,4 +63,8 @@ ul li {
 ul{
     list-style-type: none;
     display: flex;
+}
+
+#form{
+    display: none;
 }
