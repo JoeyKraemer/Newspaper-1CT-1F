@@ -431,7 +431,8 @@
                         $stmt2->execute();
                         $auto_increment = $stmt2->fetchAll();
                         $auto_increment = $auto_increment[0][0];
-                        mkdir("repository/{$auto_increment}_{$first_name}_{$last_name}", 777);
+                        mkdir("repository/{$auto_increment}_{$first_name}_{$last_name}");
+                        chmod("repository/{$auto_increment}_{$first_name}_{$last_name}", 0755);
                     }
 
                     $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
