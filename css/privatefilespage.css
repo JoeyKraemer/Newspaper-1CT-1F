@@ -4,58 +4,58 @@
 }
 
 body {
-	display: grid;
-	grid-template-columns: repeat(10, 1fr);
-	background-color:#B2BCBC;
-	font-family: Inter;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    background-color:#B2BCBC;
+    font-family: Inter;
 }
 
 header {
-	grid-column: 1/11;
+    grid-column: 1/11;
 }
 
 main {
-	grid-column: 2/10;
-	background-color: #F1F1F1; 
+    grid-column: 2/10;
+    background-color: #F1F1F1; 
 }
 
 #myfile {
-	display: flex;
-	justify-content: space-between;
-	margin: 10px;
-	box-shadow: 0px 6px 6px #B2BCBC;
-	background-color:#FFFF;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    box-shadow: 0px 6px 6px #B2BCBC;
+    background-color:#FFFF;
 }
 .myfiletext{
-	padding-left: 10px;
+    padding-left: 10px;
 }
 
 .orgfiletext{
-	padding-left: 10px;	
+    padding-left: 10px;	
 }
 
 .uploadicons{
-	display: flex;
-	justify-content: space-around;	
+    display: flex;
+    justify-content: space-around;	
 }
 
 .icons{
-	padding-inline: 15px;
+    padding-inline: 15px;
 }
 
 ul li {
-	justify-content: space-around;
+    justify-content: space-around;
 }
 
 .orgfile {
-	display: flex;
-	justify-content: space-between;
-	margin: 10px;
-	background-color:#FFFF;
-	box-shadow: 0px 6px 6px #B2BCBC;
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    background-color:#FFFF;
+    box-shadow: 0px 6px 6px #B2BCBC;
 }
 
 ul{
-	list-style-type: none;
-	display: flex;
+    list-style-type: none;
+    display: flex;
 }

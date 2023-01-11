@@ -1,6 +1,6 @@
 <?php
 session_start();
- $DB_host = "localhost";
+$DB_host = "localhost";
 $DB_user = "root";
 $DB_pass = "qwerty";
 $DB_name = "moviesdb";
