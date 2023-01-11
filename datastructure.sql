@@ -1,14 +1,8 @@
-<<<<<<< HEAD:datastructure.sql
-CREATE DATABASE IF NOT EXISTS `webapplication` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-SET FOREIGN_KEY_CHECKS=0;
-use webapplication;
-=======
 -- Please import this statement to your database via PHPmyAdmin
 DROP DATABASE IF EXISTS `gemorskos`;
 -- Create database change value in ` ` to your needs 
 CREATE DATABASE IF NOT EXISTS `gemorskos` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 use gemorskos;
->>>>>>> 10d8c733e8cc802afd3aacb89fe8d80b6d928c04:DatabaseStructure.sql
 
 -- Table TypesOfStaff
 CREATE TABLE `TypesOfStaff` (
