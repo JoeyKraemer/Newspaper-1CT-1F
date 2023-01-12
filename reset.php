@@ -13,22 +13,19 @@
         
             <h1> Gemorskos Intranet </h1>
             
-<?php
-$selector = $_GET["selector"];
-$validator = $_GET["validator"];
+            <?php
+            $selector = $_GET["selector"];
+            $validator = $_GET["validator"];
 
-//check if tokens exist inside the url
-if (empty($selector) || empty($validator)) {
-    echo "We couldn't validate your request!";
-} else {
-    if (ctype_xdigit($selector) !== false && (ctype_xdigit($validator) !== false) {
-?>
+            //check if tokens exist inside the url
+            if (empty($selector) || empty($validator)) {
+                echo "We couldn't validate your request!";
+            } else {
+            ?>
 
             <p> Welcome back. Please enter your new password and go back to login. </p>
 
             <form action="actionreset.php" method="POST">
-            <input type="hidden" name="selector" value="<?php echo $selector; ?>">
-            <input type="hidden" name="validator" value="<?php echo $validator; ?>">
             
             <input type="password" name="pwd" id="pass1" placeholder="Password">
             <input type="password" name="pwd-repeat" id="pass2" placeholder="Confirm Password">
@@ -52,17 +49,16 @@ if (empty($selector) || empty($validator)) {
             }
             
             if (isset($_GET["newpwd"])) {
-                if ($_GET["newpwd"] == "newpwd=pwdnotsame") {
+                if ($_GET["newpwd"] == "pwdnotsame") {
                     echo '<p> Your passwords are not the same! </p> ';
                 }
             }
             ?>
 
-<?php
-    }
-}
-?>       
-        </div>		
+            <?php
+                }
+            ?>       
+        </div>
         </main>
     </div>
 </body>
