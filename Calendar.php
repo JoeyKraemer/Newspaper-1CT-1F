@@ -24,11 +24,9 @@
 
     <header>
     </header>
-    <main>
-        <div class="WelcomeUser">
-            <h2>Welcome, Firstname</h2>
-        </div>
-
+    <div class="WelcomeUser">
+        <h2>Welcome, Firstname</h2>
+    </div>
         <div id="calendar">
     <div id="dateAndEvents">
         <?php
@@ -110,13 +108,13 @@
         echo("<tr>");
         echo("</tr>");
         echo("<tr>");
-        echo("<td>Sun</td>");
-        echo("<td>Mon</td>");
-        echo("<td>Tue</td>");
-        echo("<td>Wed</td>");
-        echo("<td>Thu</td>");
-        echo("<td>Fri</td>");
-        echo("<td>Sat</td>");
+        echo("<td>S</td>");
+        echo("<td>M</td>");
+        echo("<td>T</td>");
+        echo("<td>W</td>");
+        echo("<td>T</td>");
+        echo("<td>F</td>");
+        echo("<td>S</td>");
         echo("</tr>");
 
         $startDay = 0;
@@ -151,7 +149,7 @@
         // TODO: Welcome user, connect header footer
         ?>
     </table>
-    </main>
+
 </div>
 </body>
 </html>
