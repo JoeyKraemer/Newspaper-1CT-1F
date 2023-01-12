@@ -148,6 +148,16 @@
 
                         //if nothing is filled in while in edit mode, will delete the entry
                         if($deleteFlag == 8 && isset($event_id)){
+                            $stmt = $handler->prepare("SELECT count(user_id) FROM `Event_Details` WHERE event_id = $event_id");
+                            $stmt->execute();
+                            $result = $stmt->fetch()[0];
+
+                            // if people have already signed in, delete their Event_Details
+                            if ($result != 0){
+                                $stmt = $handler->prepare("DELETE FROM `Event_Details` WHERE event_id = $event_id");
+                                $stmt->execute();
+                            }
+
                             $stmt = $handler->prepare("DELETE FROM `Events` WHERE event_id = :event_id");
                             $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
                             $stmt->execute();
