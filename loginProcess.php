@@ -11,7 +11,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         print $ex;
     }  
 
-    $stmt = $dbhandler->prepare("SELECT * FROM User WHERE email_address = :email");
+    $stmt = $dbhandler->prepare("SELECT * FROM Users WHERE email_address = :email");
     $stmt->bindParam("email",$email,PDO::PARAM_STR);
     $stmt->execute();
 

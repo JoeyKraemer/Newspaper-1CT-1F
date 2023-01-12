@@ -2,85 +2,78 @@
 
 //check if user got the this page by the right way
 if (isset($_POST["reset-password-submit"])) {
-    
-    $password = $_POST["pwd"];
-    $passwordRepeat = $_POST["pwd-repeat"];
-    
+    $password = filter_input(INPUT_POST,"pwd");
+    $passwordRepeat = filter_input(INPUT_POST,"pwd-repeat");
+    $selector = filter_input(INPUT_POST,"selector");
+    $validator = filter_input(INPUT_POST,"validator");
+    $url = "http://localhost/reset.php?selector=" . $selector . "&validator=" . $validator;
+
     //check if the user left the pass empty or if passes are not the same
     if (empty($password) || empty($passwordRepeat)) {
-        header("Location:".$url."?newpwd=pwdempty"); //reset page with an message
+        header("Location:".$url. "&newpwd=pwdempty"); //reset page with an message
         exit();
     } else if ($password != $passwordRepeat) {
-        header("Location: ".$url."?newpwd=pwdnotsame"); //reset page with an update message (won't work cause the tokens arent included to the url
+        header("Location:".$url."&newpwd=pwdnotsame"); //reset page with an message
         exit();
     }
     
-    //check for the tokens
-    $currentDate = date("U");
-    
     //connect to database
+    $dbname = "gemorskos";
     try {
     $dbhandler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
     } catch (Exception $ex){
         print $ex;
     }
 
-    $stmt = $dbhandler->prepare("SELECT * FROM pwdReset WHERE pwdResetSelector=? AND pwdResetExpires >= ?");
+    $stmt = $dbhandler->prepare("SELECT * FROM pwdReset WHERE pwdResetSelector=:selector");
     if (!$stmt) {
         echo "There was an error!";
         exit();
     } else {
-        $stmt->bindParam("ss", $selector, $currentDate); //checking if the database is picking the correct token using the selector
+        $stmt->bindParam("selector",$selector,PDO::PARAM_STR);
         $stmt->execute();
+
+        $stmt->bindColumn("pwdResetToken",$pwdResetToken);
+        $stmt->bindColumn("pwdResetEmail",$tokenEmail);
         
-        $result = $stmt->get_result();
+        
+        $result = $stmt->fetch();
         if (!$result) {
             echo "You need to re-submit your reset request!";
-            exit();
-        } else {
-            
-            $tokenBin = hex2bin($validator);
-            $tokenCheck = password_verify($tokenBin, $row["pwdResetToken"]);
-            
-            if ($tokenCheck === false) {
-                echo "You need to re-submit your reset request!";
-                exit();
-            } elseif ($tokenCheck === true) {
-                
-                $tokenEmail = $row['pwdResetEmail'];
-                
-                $stmt = $dbhandler->prepare("SELECT * FROM users WHERE email_address=?");
+        } else {                
+                $stmt = $dbhandler->prepare("SELECT * FROM users WHERE email_address=:tokenEmail");
                 if (!$stmt) {
                     echo "There was an error!";
                     exit();
                 } else {
-                    $stmt->bindParam('s', $tokenEmail);
+                    $stmt->bindParam('tokenEmail', $tokenEmail);
                     $stmt->execute();
                     
-                    $result = $stmt->get_result();
+                    $result = $stmt->fetchall();
                     if (!$result) {
                         echo "You need to re-submit your reset request!";
                         exit();
                     } else {
                         
-                        $stmt = $dbhandler->prepare("UPDATE users SET user_password=? WHERE email_address=?");
+                        $stmt = $dbhandler->prepare("UPDATE users SET user_password=:newPwdHash WHERE email_address=:tokenEmail");
                         if (!$stmt) {
                             echo "There was an error!";
                             exit();
                         } else {
                             $newPwdHash = password_hash($password, PASSWORD_DEFAULT);
-                            $stmt->bindParam('ss', $newPwdHash, $tokenEmail);
+                            $stmt->bindParam("newPwdHash",$newPwdHash,PDO::PARAM_STR);
+                            $stmt->bindParam("tokenEmail",$tokenEmail,PDO::PARAM_STR);
                             $stmt->execute();
                             
                             //delete the token when user gets to the page
-                            $stmt = $dbhandler->prepare("DELETE FROM pwdReset WHERE pwdResetEmail=?");
+                            $stmt = $dbhandler->prepare("DELETE FROM pwdReset WHERE pwdResetEmail=:tokenEmail");
                             if (!$stmt) {
                                 echo "There was an error!";
                                 exit();
                             } else {
-                                $stmt->bindParam('s', "$tokenEmail");
+                                $stmt->bindParam('tokenEmail', $tokenEmail,PDO::PARAM_STR);
                                 $stmt->execute();
-                                header("Location: reset.php?newpwd=passwordupdated"); //reset page with an update message
+                                header("Location:login.php?newpwd=passwordupdated"); //reset page with an update message
                             }
                         }
                     }
@@ -88,7 +81,7 @@ if (isset($_POST["reset-password-submit"])) {
             }
         }
     }  
-} else {
-    header("Location: login.php")
+ else {
+    header("Location: login.php");
 }
 ?>

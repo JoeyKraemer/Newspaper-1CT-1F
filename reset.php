@@ -26,7 +26,8 @@
             <p> Welcome back. Please enter your new password and go back to login. </p>
 
             <form action="actionreset.php" method="POST">
-            
+            <input type="hidden" name="selector" value="<?php echo $selector ?>">
+            <input type="hidden" name="validator" value="<?php echo $validator ?>">
             <input type="password" name="pwd" id="pass1" placeholder="Password">
             <input type="password" name="pwd-repeat" id="pass2" placeholder="Confirm Password">
             
@@ -36,12 +37,6 @@
             <button type="button"> <a href="login.php"> Back to login </a> </button>
             
             <?php
-            if (isset($_GET["newpwd"])) {
-                if ($_GET["newpwd"] == "passwordupdated") {
-                    echo '<p> Your password has been reset! </p> ';
-                }
-            }
-            
             if (isset($_GET["newpwd"])) {
                 if ($_GET["newpwd"] == "pwdempty") {
                     echo '<p> Your password cannot be empty! </p> ';

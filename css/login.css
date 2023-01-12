@@ -18,7 +18,6 @@ body {
 main {
     display: grid;
     grid-column: 3/9;
-    background-color: #F1F1F1;
     height: 100vh;
 }
 
@@ -70,6 +69,7 @@ p {
     display: flex;
     flex-direction: column;
     align-items: center;
+    background-color: #F1F1F1;
 }
 
 #email {
@@ -92,5 +92,11 @@ p {
 #retryPhrase {
     visibility: visible !important;
     color: red !important;
+    size: 4rem !important;
+}
+
+#resetPasswordPhrase {
+    visibility: visible !important;
+    color: pink !important;
     size: 4rem !important;
 }
