@@ -8,6 +8,7 @@ table, th, td {
 
 .errormessage{
     color: darkred;
+    height:fit-content;
 }
 
 body{
@@ -32,6 +33,7 @@ nav>a {
     display: inline-grid;
     justify-content: center;
     height: 100vh;
+    grid-template-rows: auto 1fr;
 }
 #main2{
     justify-content: center;

@@ -29,423 +29,428 @@
         </nav>
 
         <?php
-        //Data manipulation functionality
-        if($_SERVER["REQUEST_METHOD"] == "POST"){
-            $errorMsg = [];
-            $deleteFlag = 0; // admin can remove roles/ events/ users if they change all fields to empty
-            switch ($_POST["requestType"]) {
+        echo "<div id='main'>";
+        if($userLoggedIn && $permissions) { 
 
-                // Roles
-                case 'editRole':
-                    $role_id = filter_input(INPUT_POST, 'role_id', FILTER_SANITIZE_NUMBER_INT);
-                    if(empty($role_id)){
-                        $errorMsg[] = "an id could not be fetched";
-                    }
-                //for adding roles and editing roles
-                case 'addRole':
+            //Data manipulation functionality
+            if($_SERVER["REQUEST_METHOD"] == "POST"){
+                $errorMsg = [];
+                $deleteFlag = 0; // admin can remove roles/ events/ users if they change all fields to empty
+                switch ($_POST["requestType"]) {
 
-                    //role name gets set
-                    $role_name = filter_input(INPUT_POST, 'role_name');
-                    if($role_name === null || $role_name === false){
-                        $errorMsg[] = "something went wrong while fetching the role name";
-                    } elseif (empty($role_name)) {
-                        $errorMsg[] = "a role name is required";
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z\s]/", $role_name)){
-                            $errorMsg[] = "only letters and spaces are allowed";
+                    // Roles
+                    case 'editRole':
+                        $role_id = filter_input(INPUT_POST, 'role_id', FILTER_SANITIZE_NUMBER_INT);
+                        if(empty($role_id)){
+                            $errorMsg[] = "an id could not be fetched";
                         }
-                        if(strlen($role_name) > 25) {
-                            $errorMsg[] = "only a max of 25 characters is allowed for the role name";
+                    //for adding roles and editing roles
+                    case 'addRole':
+
+                        //role name gets set
+                        $role_name = filter_input(INPUT_POST, 'role_name');
+                        if($role_name === null || $role_name === false){
+                            $errorMsg[] = "something went wrong while fetching the role name";
+                        } elseif (empty($role_name)) {
+                            $errorMsg[] = "a role name is required";
+                            $deleteFlag++;
+                        } else {
+                            if(preg_match("/[^a-zA-Z\s]/", $role_name)){
+                                $errorMsg[] = "only letters and spaces are allowed";
+                            }
+                            if(strlen($role_name) > 25) {
+                                $errorMsg[] = "only a max of 25 characters is allowed for the role name";
+                            }
+                            $andCond="";
+                            if(isset($role_id)){
+                                $andCond="AND NOT role_id = $role_id";
+                            }
+                            $stmt = $handler->prepare("SELECT role_name FROM `Roles` WHERE role_name = :role_name $andCond");
+                            $stmt->bindParam('role_name', $role_name, PDO::PARAM_STR);
+                            $stmt->execute();
+                            if (count($stmt->fetchAll()) != 0){
+                                $errorMsg[] = "that name has already been used";
+                            }
                         }
-                        $andCond="";
-                        if(isset($role_id)){
-                            $andCond="AND NOT role_id = $role_id";
+
+                        //role description gets set
+                        $role_description = filter_input(INPUT_POST, 'role_description', FILTER_SANITIZE_SPECIAL_CHARS);
+                        if ($role_description === null || $role_description === false) {
+                            $errorMsg[] = "something went wrong";
+                        } else {
+                            if (empty($role_description)){
+                                $errorMsg[] = "a role description is required";
+                                $deleteFlag++;
+                            }
                         }
-                        $stmt = $handler->prepare("SELECT role_name FROM `Roles` WHERE role_name = :role_name $andCond");
-                        $stmt->bindParam('role_name', $role_name, PDO::PARAM_STR);
+
+                        //if nothing is filled in while in edit mode, will delete the entry
+                        if($deleteFlag == 2 && isset($role_id)){
+
+                            //edge case protection for when attempting to remove role already assigned to user
+                            $stmt = $handler->prepare("SELECT user_id FROM `Users` WHERE user_role = :role_id");
+                            $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
+                            $stmt->execute();
+
+                            if (count($stmt->fetchAll()) != 0){
+                                echo "you cannot delete this role since an user has it assigned to them";
+                            } else {
+                                $stmt = $handler->prepare("DELETE FROM `Roles` WHERE role_id = :role_id");
+                                $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
+                                $stmt->execute();
+                                echo "entry has been successfully deleted <br/>";
+                            }
+                            break;
+                        }
+
+                        //counting errors
+                        if(!count($errorMsg) == 0){
+                            echo "<div class='errormessage'>";
+                            foreach($errorMsg as $msg){
+                                echo "<t>$msg</t><br/>";
+                            }
+                            echo "</div>";
+                            break;
+                        }
+
+                        //pushing changes
+                        if (isset($role_id)){
+                            $stmt = $handler->prepare("UPDATE `Roles` SET role_name = :role_name, role_description = :role_description WHERE role_id = :role_id");
+                            $stmt->bindParam("role_id", $role_id, PDO::PARAM_INT);
+                        } else {
+                            $stmt = $handler->prepare("INSERT INTO `Roles` (role_name, role_description) VALUES (:role_name, :role_description)");
+
+                        }
+                        $stmt->bindParam("role_name", $role_name, PDO::PARAM_STR);
+                        $stmt->bindParam("role_description", $role_description, PDO::PARAM_STR);
                         $stmt->execute();
-                        if (count($stmt->fetchAll()) != 0){
-                            $errorMsg[] = "that name has already been used";
-                        }
-                    }
 
-                    //role description gets set
-                    $role_description = filter_input(INPUT_POST, 'role_description', FILTER_SANITIZE_SPECIAL_CHARS);
-                    if ($role_description === null || $role_description === false) {
-                        $errorMsg[] = "something went wrong";
-                    } else {
-                        if (empty($role_description)){
+                        break;
+
+                    // Events
+                    case 'editEvent':
+
+                        $event_id = filter_input(INPUT_POST, 'event_id', FILTER_SANITIZE_NUMBER_INT);
+                        if(empty($event_id)){
+                            $errorMsg[] = "an id could not be fetched";
+                        }
+
+                    case 'addEvent':
+
+                        //event name gets set
+                        $event_name = filter_input(INPUT_POST, 'event_name', FILTER_SANITIZE_SPECIAL_CHARS);
+                        if ($event_name === null || $event_name === false) {
+                            $errorMsg[] = "something went wrong while fetching the event name";
+                        } elseif (empty($event_name)) {
+                            $errorMsg[] = "an event name is required";
+                            $deleteFlag++;
+                        } else {
+                            if (strlen($event_name) > 70) {
+                                $errorMsg[] = "only a max of 70 characters is allowed for the event name";
+                            }
+
+                            $stmt = $handler->prepare("SELECT count(event_name) FROM `Events` WHERE event_name = '{$event_name}'");
+                            $stmt->execute();
+                            $count = $stmt->fetch()[0];
+                            if($count != 0){
+                                $errorMsg[] = "event name has to be unique";
+                            }
+                        }
+
+
+
+                        // event description gets set
+                        $event_description = filter_input(INPUT_POST, 'event_description', FILTER_SANITIZE_SPECIAL_CHARS);
+                        if ($event_description === null || $event_description === false) {
+                            $errorMsg[] = "something went wrong while fetching the event description";
+                        } elseif (empty($event_description)) {
                             $errorMsg[] = "a role description is required";
                             $deleteFlag++;
                         }
-                    }
 
-                    //if nothing is filled in while in edit mode, will delete the entry
-                    if($deleteFlag == 2 && isset($role_id)){
-
-                        //edge case protection for when attempting to remove role already assigned to user
-                        $stmt = $handler->prepare("SELECT user_id FROM `Users` WHERE user_role = :role_id");
-                        $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
-                        $stmt->execute();
-
-                        if (count($stmt->fetchAll()) != 0){
-                            echo "you cannot delete this role since an user has it assigned to them";
+                        // street name gets set
+                        $location_street = filter_input(INPUT_POST, 'location_street');
+                        if($location_street === null || $location_street === false){
+                            $errorMsg[] = "something went wrong while fetching the street location";
+                        } else if(empty($location_street)){
+                            $location_street = null;
+                            $deleteFlag++;
                         } else {
-                            $stmt = $handler->prepare("DELETE FROM `Roles` WHERE role_id = :role_id");
-                            $stmt->bindParam('role_id', $role_id, PDO::PARAM_INT);
+                            if(preg_match("/[^a-zA-Z1-9\s]/", $location_street)){
+                                $errorMsg[] = "only letters, numbers and spaces are allowed for the street name";
+                            }
+                            if(strlen($location_street) > 50){
+                                $errorMsg[] = "the street name only allows a max of 50 characters";
+                            }
+                        }
+
+                        // postal code gets set
+                        $location_postal_code = filter_input(INPUT_POST, 'location_postal_code');
+                        if($location_postal_code === null || $location_street === false){
+                            $errorMsg[] = "something went wrong while fetching the postal code";
+                        } elseif(empty($location_postal_code)) {
+                            $location_postal_code = null;
+                            $deleteFlag++;
+                        } else {
+                            if (!preg_match('/^\d{4}\w{2}$/', $location_postal_code)) {
+                                $errorMsg[] = "a valid (dutch) postal code is required with the format NNNNAA";
+                            }
+                        }
+
+                        // city name gets set
+                        $location_city = filter_input(INPUT_POST, 'location_city');
+                        if ($location_city === null || $location_city === false) {
+                            $errorMsg[] = "something went wrong while fetching the city location";
+                        } elseif(empty($location_city)) {
+                            $location_city = null;
+                            $deleteFlag++;
+                        } else {
+                            if(preg_match("/[^a-zA-Z1-9\s]/", $location_city)){
+                                $errorMsg[] = "only letters, number and spaces are allowed for the city name";
+                            }
+                            if (strlen($location_city) > 30) {
+                                $errorMsg[] = "only a max of 30 characters is allowed in the city name";
+                            }
+                        }
+
+                        // event time gets set
+                        $event_time = filter_input(INPUT_POST, 'event_time');
+                        if ($event_time === null || $event_time === false){
+                            $errorMsg[] = "something went wrong while fetching the event time";
+                        } elseif(empty($event_time)) {
+                            $event_time = null;
+                            $deleteFlag++;
+                        }
+
+                        // event date gets set
+                        $event_date = filter_input(INPUT_POST, 'event_date');
+                        if ($event_date === null || $event_date === false){
+                            $errorMsg[] = "something went wrong while fetching the event date";
+                        } elseif(empty($event_date)) {
+                            $event_date = null;
+                            $deleteFlag++;
+                        }
+
+                        //event max participant gets set, removed errors due to conflict with empty input
+                        $event_max_participant = filter_input(INPUT_POST, 'event_max_participant', FILTER_VALIDATE_INT);
+                        if($event_max_participant === null || $event_max_participant === false){
+                            $event_max_participant = null;
+                            $deleteFlag++;
+                        }
+
+                        // active status gets set
+                        $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
+                        if($active === null){
+                            $active = 0;
+                        }
+
+                        //if nothing is filled in while in edit mode, will delete the entry
+                        if($deleteFlag == 8 && isset($event_id)){
+                            $stmt = $handler->prepare("DELETE FROM `Events` WHERE event_id = :event_id");
+                            $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
                             $stmt->execute();
                             echo "entry has been successfully deleted <br/>";
+                            break;
                         }
-                        break;
-                    }
 
-                    //counting errors
-                    if(!count($errorMsg) == 0){
-                        echo "<div class='errormessage'>";
-                        foreach($errorMsg as $msg){
-                            echo "<t>$msg</t><br/>";
+                        // counting errors
+                        if(!count($errorMsg) == 0){
+                            echo "<div class='errormessage'>";
+                            foreach($errorMsg as $msg){
+                                echo "<t>$msg</t><br/>";
+                            }
+                            echo "</div>";
+                            break;
                         }
-                        echo "</div>";
-                        break;
-                    }
 
-                    //pushing changes
-                    if (isset($role_id)){
-                        $stmt = $handler->prepare("UPDATE `Roles` SET role_name = :role_name, role_description = :role_description WHERE role_id = :role_id");
-                        $stmt->bindParam("role_id", $role_id, PDO::PARAM_INT);
-                    } else {
-                        $stmt = $handler->prepare("INSERT INTO `Roles` (role_name, role_description) VALUES (:role_name, :role_description)");
-
-                    }
-                    $stmt->bindParam("role_name", $role_name, PDO::PARAM_STR);
-                    $stmt->bindParam("role_description", $role_description, PDO::PARAM_STR);
-                    $stmt->execute();
-
-                    break;
-
-                // Events
-                case 'editEvent':
-
-                    $event_id = filter_input(INPUT_POST, 'event_id', FILTER_SANITIZE_NUMBER_INT);
-                    if(empty($event_id)){
-                        $errorMsg[] = "an id could not be fetched";
-                    }
-
-                case 'addEvent':
-
-                    //event name gets set
-                    $event_name = filter_input(INPUT_POST, 'event_name');
-                    if ($event_name === null || $event_name === false) {
-                        $errorMsg[] = "something went wrong while fetching the event name";
-                    } elseif (empty($event_name)) {
-                        $errorMsg[] = "an event name is required";
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z\s]/", $event_name)){
-                            $errorMsg[] = "only letters and spaces are allowed for the event name";
+                        // pushing changes
+                        if(isset($event_id)){
+                            $stmt = $handler->prepare('UPDATE `Events` SET 
+                            event_name = :event_name, 
+                            event_description = :event_description, 
+                            location_street = :location_street, 
+                            location_postal_code = :location_postal_code, 
+                            location_city = :location_city,
+                            event_time = :event_time,
+                            event_date = :event_date,
+                            event_max_participant = :event_max_participant,
+                            active = :active
+                            WHERE event_id = :event_id');
+                            $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
+                        } else {
+                            $stmt = $handler->prepare('INSERT INTO `Events`
+                            (event_name, event_description, location_street, location_postal_code, location_city, event_time, event_date, event_max_participant, active) VALUES
+                            (:event_name, :event_description, :location_street, :location_postal_code, :location_city, :event_time, :event_date, :event_max_participant, :active)
+                            ');
                         }
-                        if (strlen($event_name) > 70) {
-                            $errorMsg[] = "only a max of 70 characters is allowed for the event name";
-                        }
-                    }
-
-
-
-                    // event description gets set
-                    $event_description = filter_input(INPUT_POST, 'event_description', FILTER_SANITIZE_SPECIAL_CHARS);
-                    if ($event_description === null || $event_description === false) {
-                        $errorMsg[] = "something went wrong while fetching the event description";
-                    } elseif (empty($event_description)) {
-                        $errorMsg[] = "a role description is required";
-                        $deleteFlag++;
-                    }
-
-                    // street name gets set
-                    $location_street = filter_input(INPUT_POST, 'location_street');
-                    if($location_street === null || $location_street === false){
-                        $errorMsg[] = "something went wrong while fetching the street location";
-                    } else if(empty($location_street)){
-                        $location_street = null;
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z1-9\s]/", $location_street)){
-                            $errorMsg[] = "only letters, numbers and spaces are allowed for the street name";
-                        }
-                        if(strlen($location_street) > 50){
-                            $errorMsg[] = "the street name only allows a max of 50 characters";
-                        }
-                    }
-
-                    // postal code gets set
-                    $location_postal_code = filter_input(INPUT_POST, 'location_postal_code');
-                    if($location_postal_code === null || $location_street === false){
-                        $errorMsg[] = "something went wrong while fetching the postal code";
-                    } elseif(empty($location_postal_code)) {
-                        $location_postal_code = null;
-                        $deleteFlag++;
-                    } else {
-                        if (!preg_match('/^\d{4}\w{2}$/', $location_postal_code)) {
-                            $errorMsg[] = "a valid (dutch) postal code is required with the format NNNNAA";
-                        }
-                    }
-
-                    // city name gets set
-                    $location_city = filter_input(INPUT_POST, 'location_city');
-                    if ($location_city === null || $location_city === false) {
-                        $errorMsg[] = "something went wrong while fetching the city location";
-                    } elseif(empty($location_city)) {
-                        $location_city = null;
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z1-9\s]/", $location_city)){
-                            $errorMsg[] = "only letters, number and spaces are allowed for the city name";
-                        }
-                        if (strlen($location_city) > 30) {
-                            $errorMsg[] = "only a max of 30 characters is allowed in the city name";
-                        }
-                    }
-
-                    // event time gets set
-                    $event_time = filter_input(INPUT_POST, 'event_time');
-                    if ($event_time === null || $event_time === false){
-                        $errorMsg[] = "something went wrong while fetching the event time";
-                    } elseif(empty($event_time)) {
-                        $event_time = null;
-                        $deleteFlag++;
-                    }
-
-                    // event date gets set
-                    $event_date = filter_input(INPUT_POST, 'event_date');
-                    if ($event_date === null || $event_date === false){
-                        $errorMsg[] = "something went wrong while fetching the event date";
-                    } elseif(empty($event_date)) {
-                        $event_date = null;
-                        $deleteFlag++;
-                    }
-
-                    //event max participant gets set, removed errors due to conflict with empty input
-                    $event_max_participant = filter_input(INPUT_POST, 'event_max_participant', FILTER_VALIDATE_INT);
-                    if($event_max_participant === null || $event_max_participant === false){
-                        $event_max_participant = null;
-                        $deleteFlag++;
-                    }
-
-                    // active status gets set
-                    $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
-                    if($active === null){
-                        $active = 0;
-                    }
-
-                    //if nothing is filled in while in edit mode, will delete the entry
-                    if($deleteFlag == 8 && isset($event_id)){
-                        $stmt = $handler->prepare("DELETE FROM `Events` WHERE event_id = :event_id");
-                        $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
+                        $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
+                        $stmt->bindParam('event_description', $event_description, PDO::PARAM_STR);
+                        $stmt->bindParam('location_street', $location_street, ($location_street ? PDO::PARAM_STR : PDO::PARAM_NULL));
+                        $stmt->bindParam('location_postal_code', $location_postal_code, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
+                        $stmt->bindParam('location_city', $location_city, ($location_city? PDO::PARAM_STR : PDO::PARAM_NULL));
+                        $stmt->bindParam('event_time', $event_time, ($event_time? PDO::PARAM_STR : PDO::PARAM_NULL));
+                        $stmt->bindParam('event_date', $event_date, ($event_date? PDO::PARAM_STR : PDO::PARAM_NULL));
+                        $stmt->bindParam('event_max_participant', $event_max_participant, ($event_max_participant? PDO::PARAM_INT : PDO::PARAM_NULL));
+                        $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
                         $stmt->execute();
-                        echo "entry has been successfully deleted <br/>";
                         break;
-                    }
 
-                    // counting errors
-                    if(!count($errorMsg) == 0){
-                        echo "<div class='errormessage'>";
-                        foreach($errorMsg as $msg){
-                            echo "<t>$msg</t><br/>";
+                    // Users
+                    case 'editUser':
+                        $user_id = filter_input(INPUT_POST, 'user_id', FILTER_SANITIZE_NUMBER_INT);
+                        if(empty($user_id)){
+                            $errorMsg[] = "an id could not be fetched";
                         }
-                        echo "</div>";
-                        break;
-                    }
 
-                    // pushing changes
-                    if(isset($event_id)){
-                        $stmt = $handler->prepare('UPDATE `Events` SET 
-                        event_name = :event_name, 
-                        event_description = :event_description, 
-                        location_street = :location_street, 
-                        location_postal_code = :location_postal_code, 
-                        location_city = :location_city,
-                        event_time = :event_time,
-                        event_date = :event_date,
-                        event_max_participant = :event_max_participant,
-                        active = :active
-                        WHERE event_id = :event_id');
-                        $stmt->bindParam('event_id', $event_id, PDO::PARAM_INT);
-                    } else {
-                        $stmt = $handler->prepare('INSERT INTO `Events`
-                        (event_name, event_description, location_street, location_postal_code, location_city, event_time, event_date, event_max_participant, active) VALUES
-                        (:event_name, :event_description, :location_street, :location_postal_code, :location_city, :event_time, :event_date, :event_max_participant, :active)
-                        ');
-                    }
-                    $stmt->bindParam('event_name', $event_name, PDO::PARAM_STR);
-                    $stmt->bindParam('event_description', $event_description, PDO::PARAM_STR);
-                    $stmt->bindParam('location_street', $location_street, ($location_street ? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('location_postal_code', $location_postal_code, ($location_postal_code? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('location_city', $location_city, ($location_city? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('event_time', $event_time, ($event_time? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('event_date', $event_date, ($event_date? PDO::PARAM_STR : PDO::PARAM_NULL));
-                    $stmt->bindParam('event_max_participant', $event_max_participant, ($event_max_participant? PDO::PARAM_INT : PDO::PARAM_NULL));
-                    $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
-                    $stmt->execute();
-                    break;
+                    case 'addUser':
 
-                // Users
-                case 'editUser':
-                    $user_id = filter_input(INPUT_POST, 'user_id', FILTER_SANITIZE_NUMBER_INT);
-                    if(empty($user_id)){
-                        $errorMsg[] = "an id could not be fetched";
-                    }
-
-                case 'addUser':
-
-                    // first name gets set
-                    $first_name = filter_input(INPUT_POST, 'first_name');
-                    if($first_name === null || $first_name === false) {
-                        $errorMsg[] = "something went wrong while fetching the first name";
-                    } elseif (empty($first_name)) {
-                        $errorMsg[] = "first name must be filled in";
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z\s]/", $first_name)){
-                            $errorMsg[] = "only (standard) letters and spaces are allowed in the first name";
+                        // first name gets set
+                        $first_name = filter_input(INPUT_POST, 'first_name');
+                        if($first_name === null || $first_name === false) {
+                            $errorMsg[] = "something went wrong while fetching the first name";
+                        } elseif (empty($first_name)) {
+                            $errorMsg[] = "first name must be filled in";
+                            $deleteFlag++;
+                        } else {
+                            if(preg_match("/[^a-zA-Z\s]/", $first_name)){
+                                $errorMsg[] = "only (standard) letters and spaces are allowed in the first name";
+                            }
+                            if(strlen($first_name) > 25){
+                                $errorMsg[] = "first name may only be a max of 25 characters";
+                            }
                         }
-                        if(strlen($first_name) > 25){
-                            $errorMsg[] = "first name may only be a max of 25 characters";
-                        }
-                    }
 
-                    // last name gets set
-                    $last_name = filter_input(INPUT_POST, 'last_name');
-                    if($last_name === null || $last_name === false) {
-                        $errorMsg[] = "something went wrong while fetching the last name";
-                    } elseif (empty($last_name)) {
-                        $errorMsg[] = "last name must be filled in";
-                        $deleteFlag++;
-                    } else {
-                        if(preg_match("/[^a-zA-Z\s]/", $last_name)){
-                            $errorMsg[] = "only (standard) letters and spaces are allowed in the last name";
+                        // last name gets set
+                        $last_name = filter_input(INPUT_POST, 'last_name');
+                        if($last_name === null || $last_name === false) {
+                            $errorMsg[] = "something went wrong while fetching the last name";
+                        } elseif (empty($last_name)) {
+                            $errorMsg[] = "last name must be filled in";
+                            $deleteFlag++;
+                        } else {
+                            if(preg_match("/[^a-zA-Z\s]/", $last_name)){
+                                $errorMsg[] = "only (standard) letters and spaces are allowed in the last name";
+                            }
+                            if(strlen($last_name) > 25){
+                                $errorMsg[] = "last name may only be a max of 25 characters";
+                            }
                         }
-                        if(strlen($last_name) > 25){
-                            $errorMsg[] = "last name may only be a max of 25 characters";
-                        }
-                    }
 
-                    // email gets set
-                    $email_address = filter_input(INPUT_POST, 'email_address');
-                    if($email_address === null || $email_address === false) {
-                        $errorMsg[] = "something went wrong while fetching the email address";
-                    } else if (empty($email_address)) {
-                        $errorMsg[] = "email address must be filled in";
-                        $deleteFlag++;
-                    } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
-                        $errorMsg[] = "the email address you have provided is incorrect";
-                    } elseif (strlen($email_address) > 50) {
-                        $errorMsg[] = "email may not be more than 50 characters";
-                    }
-                        $andCond = "";
-                        if (isset($user_id)) {
-                            $andCond = "AND NOT user_id = $user_id";
+                        // email gets set
+                        $email_address = filter_input(INPUT_POST, 'email_address');
+                        if($email_address === null || $email_address === false) {
+                            $errorMsg[] = "something went wrong while fetching the email address";
+                        } else if (empty($email_address)) {
+                            $errorMsg[] = "email address must be filled in";
+                            $deleteFlag++;
+                        } else if (!filter_var($email_address, FILTER_VALIDATE_EMAIL)){
+                            $errorMsg[] = "the email address you have provided is incorrect";
+                        } elseif (strlen($email_address) > 50) {
+                            $errorMsg[] = "email may not be more than 50 characters";
                         }
-                        $stmt = $handler->prepare("SELECT email_address FROM `Users` WHERE email_address = :email_address $andCond");
+                            $andCond = "";
+                            if (isset($user_id)) {
+                                $andCond = "AND NOT user_id = $user_id";
+                            }
+                            $stmt = $handler->prepare("SELECT email_address FROM `Users` WHERE email_address = :email_address $andCond");
+                            $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
+                            $stmt->execute();
+                            if (count($stmt->fetchAll()) != 0) {
+                                $errorMsg[] = "that email has already been used";
+                            }
+
+                        // type gets set
+                        $type_of_staff = filter_input(INPUT_POST, 'type_of_staff');
+                        if($type_of_staff === null || $type_of_staff === false){
+                            $errorMsg[] = "something went wrong while fetching staff type";
+                        } elseif (!filter_var($type_of_staff, FILTER_VALIDATE_INT)) {
+                            $errorMsg[] = "type of staff does not seem to be a number";
+                        } else {
+                            $stmt = $handler->prepare("SELECT type_of_staff_id FROM `TypesOfStaff` WHERE type_of_staff_id = :type_of_staff");
+                            $stmt->bindParam("type_of_staff", $type_of_staff, PDO::PARAM_INT);
+                            $stmt->execute();
+                            if(count($stmt->fetchAll()) != 1){
+                                $errorMsg[] = "the type of staff is out of bounds";
+                            }
+                        }
+
+                        // role gets set
+                        $user_role = filter_input(INPUT_POST, 'user_role');
+                        if($user_role === null || $user_role === false){
+                            $errorMsg[] = "something went wrong while fetching the user role";
+                        } elseif (!filter_var($user_role, FILTER_VALIDATE_INT)) {
+                            $errorMsg[] = "user role does not seem to be a number";
+                        } else {
+                            $stmt = $handler->prepare("SELECT role_id FROM `Roles` WHERE role_id = :user_role");
+                            $stmt->bindParam("user_role", $user_role, PDO::PARAM_INT);
+                            $stmt->execute();
+                            if(count($stmt->fetchAll()) != 1){
+                                $errorMsg[] = "the user role is out of bounds";
+                            }
+                        }
+
+                        // active status gets set
+                        $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
+                        if($active === null){
+                            $active = 0;
+                        }
+
+                        //if nothing is filled in while in edit mode, will delete the entry
+                        if($deleteFlag == 4 && isset($user_id)){
+                            $stmt = $handler->prepare("DELETE FROM `User` WHERE user_id = :user_id");
+                            $stmt->bindParam('user_id', $user_id, PDO::PARAM_INT);
+                            $stmt->execute();
+                            echo "entry has been successfully deleted <br/>";
+                            break;
+                        }
+
+                        // counting errors
+                        if(!count($errorMsg) == 0){
+                            echo "<div class='errormessage'>";
+                            foreach($errorMsg as $msg){
+                                echo "<t>$msg</t><br/>";
+                            }
+                            echo "</div>";
+                            break;
+                        }
+
+                        if(isset($user_id)){
+                            $stmt = $handler->prepare('UPDATE `Users` SET
+                            first_name = :first_name,
+                            last_name = :last_name,
+                            email_address = :email_address,
+                            type_of_staff = :type_of_staff,
+                            user_role = :user_role,
+                            active = :active
+                            WHERE user_id = :user_id');
+                            $stmt->bindParam('user_id', $user_id);
+                        } else {
+                            $stmt = $handler->prepare('INSERT INTO `Users`
+                            (user_password, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active) VALUES
+                            (:user_password, (NOW()), :first_name, :last_name, :email_address, :type_of_staff, :user_role, :active)
+                            ');
+                            $hashedPass = password_hash($defaultPass, PASSWORD_BCRYPT);
+                            $stmt->bindParam('user_password', $hashedPass, PDO::PARAM_STR);
+                        }
+
+                        $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
+                        $stmt->bindParam('last_name', $last_name, PDO::PARAM_STR);
                         $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
+                        $stmt->bindParam('type_of_staff', $type_of_staff, PDO::PARAM_INT);
+                        $stmt->bindParam('user_role', $user_role, PDO::PARAM_INT);
+                        $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
                         $stmt->execute();
-                        if (count($stmt->fetchAll()) != 0) {
-                            $errorMsg[] = "that email has already been used";
-                        }
 
-                    // type gets set
-                    $type_of_staff = filter_input(INPUT_POST, 'type_of_staff');
-                    if($type_of_staff === null || $type_of_staff === false){
-                        $errorMsg[] = "something went wrong while fetching staff type";
-                    } elseif (!filter_var($type_of_staff, FILTER_VALIDATE_INT)) {
-                        $errorMsg[] = "type of staff does not seem to be a number";
-                    } else {
-                        $stmt = $handler->prepare("SELECT type_of_staff_id FROM `TypesOfStaff` WHERE type_of_staff_id = :type_of_staff");
-                        $stmt->bindParam("type_of_staff", $type_of_staff, PDO::PARAM_INT);
-                        $stmt->execute();
-                        if(count($stmt->fetchAll()) != 1){
-                            $errorMsg[] = "the type of staff is out of bounds";
-                        }
-                    }
-
-                    // role gets set
-                    $user_role = filter_input(INPUT_POST, 'user_role');
-                    if($user_role === null || $user_role === false){
-                        $errorMsg[] = "something went wrong while fetching the user role";
-                    } elseif (!filter_var($user_role, FILTER_VALIDATE_INT)) {
-                        $errorMsg[] = "user role does not seem to be a number";
-                    } else {
-                        $stmt = $handler->prepare("SELECT role_id FROM `Roles` WHERE role_id = :user_role");
-                        $stmt->bindParam("user_role", $user_role, PDO::PARAM_INT);
-                        $stmt->execute();
-                        if(count($stmt->fetchAll()) != 1){
-                            $errorMsg[] = "the user role is out of bounds";
-                        }
-                    }
-
-                    // active status gets set
-                    $active = filter_input(INPUT_POST, 'active', FILTER_VALIDATE_BOOL);
-                    if($active === null){
-                        $active = 0;
-                    }
-
-                    //if nothing is filled in while in edit mode, will delete the entry
-                    if($deleteFlag == 4 && isset($user_id)){
-                        $stmt = $handler->prepare("DELETE FROM `User` WHERE user_id = :user_id");
-                        $stmt->bindParam('user_id', $user_id, PDO::PARAM_INT);
-                        $stmt->execute();
-                        echo "entry has been successfully deleted <br/>";
                         break;
-                    }
 
-                    // counting errors
-                    if(!count($errorMsg) == 0){
-                        echo "<div class='errormessage'>";
-                        foreach($errorMsg as $msg){
-                            echo "<t>$msg</t><br/>";
-                        }
-                        echo "</div>";
+
+                    default:
+                        echo("something went wrong while fetching requestType");
                         break;
-                    }
-
-                    if(isset($user_id)){
-                        $stmt = $handler->prepare('UPDATE `Users` SET
-                        first_name = :first_name,
-                        last_name = :last_name,
-                        email_address = :email_address,
-                        type_of_staff = :type_of_staff,
-                        user_role = :user_role,
-                        active = :active
-                        WHERE user_id = :user_id');
-                        $stmt->bindParam('user_id', $user_id);
-                    } else {
-                        $stmt = $handler->prepare('INSERT INTO `Users`
-                        (user_password, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active) VALUES
-                        (:user_password, (NOW()), :first_name, :last_name, :email_address, :type_of_staff, :user_role, :active)
-                        ');
-                        $hashedPass = password_hash($defaultPass, PASSWORD_BCRYPT);
-                        $stmt->bindParam('user_password', $hashedPass, PDO::PARAM_STR);
-                    }
-
-                    $stmt->bindParam('first_name', $first_name, PDO::PARAM_STR);
-                    $stmt->bindParam('last_name', $last_name, PDO::PARAM_STR);
-                    $stmt->bindParam('email_address', $email_address, PDO::PARAM_STR);
-                    $stmt->bindParam('type_of_staff', $type_of_staff, PDO::PARAM_INT);
-                    $stmt->bindParam('user_role', $user_role, PDO::PARAM_INT);
-                    $stmt->bindParam('active', $active, PDO::PARAM_BOOL);
-                    $stmt->execute();
-
-                    break;
-
-
-                default:
-                    echo("something went wrong while fetching requestType");
-                    break;
+                }
             }
-        }
 
-        //show functionality
-        if($userLoggedIn && $permissions) { // get amount of entries to show
-
+            //show functionality
             $view = "";
             if(isset($_GET["view"])){
                 $view = filter_input(INPUT_GET, 'view', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -471,7 +476,6 @@
             }
 
             echo "
-            <div id='main'>
                 <div id='main2'>
                     <div id='searchbar'>
                         <br/>
@@ -646,6 +650,7 @@
                             }
                         }
 
+                        // adds a WHERE parameter in order to search for the customers custom input
                         $where = "";
                         if(isset($search) AND $search){
                             $items = ['event_description', 'location_street', 'location_postal_code', 'location_city'];
