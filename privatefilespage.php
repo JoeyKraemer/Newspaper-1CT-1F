@@ -100,7 +100,7 @@
 					</ul>
 				</div>
 			</div>
-			<table>
+			<table id='filesTable'>
                 <?php
                     $i = 0;
                     foreach(scandir($filePath) as $file_name){
@@ -119,7 +119,7 @@
                                 <td class='file_name'>$file_name</td>
                                 <td class='file_size'>$file_size</td>
                                 <td class='file_ctime'>uploaded on: ". date('d/m/Y',$file_ctime) ."</td>
-                                <td class='options' onclick=\"openContext($i, '{$filePath}{$file_name}')\"><img src='img/menu.png'/></td>
+                                <td class='options' onclick=\"openContext($i, '{$filePath}{$file_name}')\"><img src='img/menu.png' alt='context menu'/></td>
                             </tr>
                             ";
                         }

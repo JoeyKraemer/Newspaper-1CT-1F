@@ -21,7 +21,48 @@ header {
 
 main {
     grid-column: 2/10;
-    background-color: #F1F1F1; 
+    background-color: #F1F1F1;
+    height: 100vh;
+}
+#filesTable{
+    width: 79vw;
+    margin-left: auto;
+    margin-right: auto;
+    height: 2.8rem;
+}
+#filesTable tr{
+    box-shadow: 0 2px 0 #8F8F8F inset,
+                0 -2px 0 #8F8F8F inset;
+}
+
+#filesTable .file_name{
+    font-weight: bold;
+}
+
+#filesTable .file_name{
+    width: 1%;
+    white-space: nowrap;
+}
+
+#filesTable .file_size{
+    color: #8F8F8F;
+}
+
+#filesTable .file_ctime{
+    text-align: right;
+    position: relative;
+    right: 3vw;
+}
+
+#filesTable .options img{
+    display:flex;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.contextMenu a {
+    display: block;
+    padding-top: 0.5vw;
 }
 
 #myfile {
@@ -41,7 +82,23 @@ main {
 
 .uploadicons{
     display: flex;
-    justify-content: space-around;	
+    justify-content: space-around;
+}
+.uploadicons li{
+    display:flex;
+    align-content: center;
+    justify-content: center;
+}
+.uploadicons a{
+    height: 100%;
+    width: 100%;
+    display:flex;
+    align-content: center;
+    justify-content: center;
+}
+.uploadicons img{
+    margin-top: auto;
+    margin-bottom: auto;
 }
 
 .icons{

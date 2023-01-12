@@ -12,7 +12,6 @@ function openContext(i, filePath){
     downloadtxt.href = filePath;
     menu.appendChild(downloadtxt);
 
-    menu.appendChild(document.createElement('br'));
     deletetxt.innerHTML = 'delete';
     deletetxt.href = "javascript:deleteFile('" + fileName + "')";
     menu.appendChild(deletetxt);
@@ -30,9 +29,10 @@ function openContext(i, filePath){
 
     menu.style.left = rect.left + "px";
     menu.style.top = rect.bottom + "px";
+    menu.className = "contextMenu";
     menu.onclick = event=>event.stopPropagation();
     // assigns the attibutes onto menu
-    styles = [["width", "5vw"], ["height", "6vw"], ["background-color", "lightGrey"]];
+    styles = [["width", "fit-content"], ["height", "fit-content"], ["background-color", "lightGrey"], ['padding-bottom', '1vw'], ['padding-left', '0.5vw'], ['padding-right', '1vw']];
     styles.forEach(item => {
        menu.style[item[0]] = item[1];
     });
