@@ -21,33 +21,35 @@ if(isset($_POST["reset-request-submit"])) {
     $expires = date("U") + 1800;
     
     //connect to database
+    try {
     $dbhandler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
+    } catch (Exception $ex){
+        print $ex;
+    }
     
     $userEmail = $_POST["email"];
     
     //delete any existing token from the same user (if an user tries to get an email sent twice without reseting their pass first)
-    $stmt = "DELETE FROM pwdreset WHERE pwdResetEmail=?;";
+    $stmt = $dbhandler->prepare("DELETE FROM pwdreset WHERE pwdResetEmail=?");
     if (!$stmt) {
         echo "There was an error!";
         exit();
     } else {
-        $stmt->bindParam($stmt, $userEmail, PDO::PARAM_STR);
+        $stmt->bindParam('s', $userEmail);
         $stmt->execute();
     }
     
-    $stmt = $dbhandler->prepare("INSERT INTO pwdReset (pwdResetEmail, pwdResetSelector, pwdResetToken, pwdResetExpires) VALUES (?, ?, ?, ?);");
-    $stmt->execute();
-    
+    $stmt = $dbhandler->prepare("INSERT INTO pwdReset (pwdResetEmail, pwdResetSelector, pwdResetToken, pwdResetExpires) VALUES (?, ?, ?, ?)"); 
     if (!$stmt) {
         echo "There was an error!";
         exit();
     } else {
         $hashedToken = password_hash($token, PASSWORD_DEFAULT); //hash the token for security
-        $stmt->bindParam($stmt, $userEmail, $selector, $hashedToken, $expires, PDO::PARAM_STR);
+        $stmt->bind_param('ssss', $userEmail, $selector, $hashedToken, $expires);
         $stmt->execute();
     }
     
-    mysqli_stmt_close($stmt);
+    mysqli_stmt_close($stmt); //ASK HOW TO DO THIS 
     mysqli_close($conn);
     
     //sending the email using php mailer    
