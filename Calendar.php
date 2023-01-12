@@ -24,9 +24,30 @@
 
     <header>
     </header>
+<<<<<<< HEAD
     <div class="WelcomeUser">
         <h2>Welcome, Firstname</h2>
     </div>
+=======
+        <?php
+        if(isset($dbHandler)) {
+            try {
+                $welcomeUser = "Welcome, " . $_GET['user_name'];
+                $userstmt = $dbHandler->prepare("SELECT * FROM 'Users' WHERE first_name = :user_name");
+                $userstmt->bindParam('user_name', $welcomeUser, PDO::PARAM_STR);
+
+                $userstmt->execute();
+                if ($user = $userstmt->fetch(PDO::FETCH_OBJ)) {
+                    echo "<div class='WelcomeUser'><h2>Welcome," . $user . "</h2></div>";
+                }
+            } catch (Exception $e) {
+
+            }
+        }
+        ?>
+
+
+>>>>>>> 508012d1fc2c75c64d1b86e811518e934e8fdeed
         <div id="calendar">
     <div id="dateAndEvents">
         <?php
@@ -145,11 +166,14 @@
                 echo("<tr>");
             }
         }
-        echo("</tr>");
+            echo("</tr>");
         // TODO: Welcome user, connect header footer
-        ?>
+         ?>
     </table>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 508012d1fc2c75c64d1b86e811518e934e8fdeed
 </div>
 </body>
 </html>
