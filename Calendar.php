@@ -1,16 +1,14 @@
 <?php
+session_start();
+if (!isset($_SESSION["month"])) {
+    $_SESSION["month"] = date("m");
+}
 try{
     $dbHandler = new PDO("mysql:host=mysql;dbname=gemorskos;charset=utf8", "root", "qwerty");
 }
 catch(Exception $ex){
     echo "The following exception has occurred $ex";
 }
-
-if (!isset($_GET["event_date"])) {
-    $today = date("d");
-    header("Location: Calendar.php?event_date=$today");
-}
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -55,8 +53,30 @@ if (!isset($_GET["event_date"])) {
     <div id="calendar">
         <div id="dateAndEvents">
             <?php
-            if($_SERVER['REQUEST_METHOD'] === 'GET' && !empty($_GET["event_date"])) {
-                echo '<div id="date"><span style="font-size: 3em;" id="calendarDate">' . $_GET["event_date"] . '</span><h3>'. date("F") . '<br>' . date("o") . '</h3></div>';
+            $today = "";
+            $months = array('January','February','March','April','May','June','July','August','September','October','November','December');
+
+            if($_SERVER['REQUEST_METHOD'] === 'GET') {
+                // set date
+                if (empty($_GET["event_date"])) {
+                    $today = date("d");
+                } else {
+                    $today = $_GET["event_date"];
+                }
+
+                if (isset($_GET["month"])) {
+                    if ($_GET["month"][0] == "+") {
+                        if ($_SESSION["month"] < 11) {
+                            $_SESSION["month"] += intval($_GET["month"][1]);
+                        }
+                    } else {
+                        if ($_SESSION["month"] >= 1) {
+                            $_SESSION["month"] -= intval($_GET["month"][1]);
+                        }
+                    }
+                }
+
+                echo '<div id="date"><span style="font-size: 3em;" id="calendarDate">' . $today . '</span><h3>'. $months[$_SESSION["month"]] . '<br>' . date("o") . '</h3></div>';
             }
             ?>
 
@@ -64,7 +84,7 @@ if (!isset($_GET["event_date"])) {
                 <?php
                 if(isset($dbHandler)){
                     try {
-                        $currDate = date("o") . "-" . date("m") . "-" . $_GET['event_date'];
+                        $currDate = date("o") . "-" . date("m") . "-" . $today;
                         $stmt = $dbHandler->prepare("SELECT * FROM `Events` WHERE event_date = :event_date");
                         $stmt->bindParam("event_date", $currDate, PDO::PARAM_STR);
 
@@ -89,12 +109,24 @@ if (!isset($_GET["event_date"])) {
                 ?>
             </div>
         </div>
+        <div style="display: flex; flex-direction: row;">
+            <form action="Calendar.php" method="get">
+                <input type="submit" value="<">
+                <input type="hidden" name="month" value="-1">
+            </form>
+            <p style="margin: 0"><?php echo $months[$_SESSION["month"]]; ?></p>
+            <form action="Calendar.php" method="get">
+                <input type="submit" value=">">
+                <input type="hidden" name="month" value="+1">
+            </form>
+        </div>
         <table border='0'>
+
             <?php
             $date = getdate();
 
             $mday = $date['mday'];
-            $mon = $date['mon'];
+            $mon = $_SESSION["month"] +1;
             $wday = $date['wday'];
             $month = $date['month'];
             $year = $date['year'];
