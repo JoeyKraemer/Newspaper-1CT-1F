@@ -21,6 +21,16 @@ foreach ($stmt->fetchall() as $photo) {
 </head>
 <body>
 <div id="gridContainer">
+<header>
+        <p> Gemorskos </p>
+        <nav>
+            <ul>
+                <li> <a href="#"> <img src="img/folder.svg" alt="filesbutton"/> </a> </li>
+                <li> <a href="#"> <img src="img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                <li> <a href="#"> <img src="img/person.svg" alt="profilebutton"/> </a> </li>
+            </ul>
+        </nav>
+    </header>
     <main>
         <div id="content">
             <img src="upload/<?php echo $image ?>" alt="" id="circle">
