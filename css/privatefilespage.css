@@ -15,6 +15,7 @@ body {
     grid-template-columns: repeat(10, 1fr);
     background-color:#B2BCBC;
     font-family: Inter;
+    text-align: center;
 }
 
 header {
@@ -91,12 +92,13 @@ ul {
     width: 79vw;
     margin-left: auto;
     margin-right: auto;
-    height: 2.8rem;
+    height: fit-content;
 }
 
 #filesTable tr {
     box-shadow: 0 2px 0 #8F8F8F inset,
                 0 -2px 0 #8F8F8F inset;
+    height: 1.8vw;
 }
 
 #filesTable .file_name {
