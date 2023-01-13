@@ -1,73 +1,88 @@
-html, body{
+/*Media queries */ 
+
+/*HTML tags */
+html, body {
     margin: 0;
     padding: 0;
 }
+
 table, th, td {
     border: 1px solid;
 }
 
-.errormessage{
-    color: darkred;
-}
-
-body{
+body {
     background-color: #B2BCBC;
     display: grid;
     grid-template-columns: 20vw 30vw 30vw 20vw;
 }
-nav{
+
+nav {
     background-color: #50595B;
     width:  fit-content;
     height: fit-content;
     padding: 0.5vw;
     justify-self: end;
 }
+
 nav>a {
     color: #F1F1F1;
     font-size: 1.3rem;
 }
-#main{
+
+/* Class */
+.errormessage {
+    color: darkred;
+}
+
+/* IDs */
+#main {
     background-color: #F1F1F1;
     grid-column: 2/4;
     display: inline-grid;
     justify-content: center;
     height: 100vh;
 }
-#main2{
+
+#main2 {
     justify-content: center;
     display: grid;
     width: 55vw;
     height: 10vw;
 }
 
-#searchbar{
+#searchbar {
     justify-self: center;
 }
 
-#main2>table td{
+#main2>table td {
     height: 1rem;
 }
-#main2>table th{
+
+#main2>table th {
     height: 16px;
 }
 
-#main2>form{
+#main2>form {
     display: grid;
     grid-template-columns: auto 8vw auto;
 }
-#main2>form label{
+
+#main2>form label {
     grid-column: 2/3;
     justify-self: start;
 }
-#main2>form input{
+
+#main2>form input {
     grid-column: 3/4;
     justify-self: start;
 }
-#main2>form select{
+
+#main2>form select {
     grid-column: 3/4;
     justify-self: start;
 }
-#main2>form textarea{
+
+#main2>form textarea {
     grid-column: 3/4;
     justify-self: start;
 }
