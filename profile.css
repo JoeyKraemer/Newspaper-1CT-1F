@@ -65,13 +65,12 @@ a {
 }
 
 .jobBox{
-width: 397px;
+width: 220px;
 height: 40px;
 background: #50595B;
 align-items: center;
 display: flex;
 justify-content: center;
-
 }
 p{
     text-align: center;
