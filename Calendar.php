@@ -58,10 +58,11 @@
                             $value = $stmt->fetch(PDO::FETCH_OBJ);
                             if ($stmt->rowCount() > 0) {
                                 echo "<br>";
-                                echo "<u>My Schedule</u>";
+                                echo "<u>Upcoming Events</u>";
                                 echo "<ul>" . $value->event_name . "</ul>";
-                                echo "<li>" . $value->event_time . "</li>";
                                 echo "<li>" . $value->event_description . "</li>";
+                                echo "<li>" . $value->event_time . " "  . $value->event_date . "</li>";
+                                echo "<li>" . $value->location_street . " " . $value->location_city . ", " . $value->location_postal_code . "</li>";
                             }
                         }
                         catch(Exception $ex){

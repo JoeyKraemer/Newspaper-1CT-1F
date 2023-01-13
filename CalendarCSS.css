@@ -74,7 +74,8 @@ li{
     background-color: #50595B;
     color: white;
     flex-direction: column;
-    flex: 25%;
+    flex-wrap: wrap;
+    max-width: 25%;
 }
 
 #date {
