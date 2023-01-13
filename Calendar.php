@@ -17,8 +17,8 @@ if (!isset($_GET["event_date"])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link type="text/css" rel="stylesheet" href="CalendarCSS.css">
-    <link type="text/css" rel="stylesheet" href="normalize.css">
+    <link type="text/css" rel="stylesheet" href="css/CalendarCSS.css">
+    <link type="text/css" rel="stylesheet" href="css/normalize.css">
     <title>Title</title>
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
