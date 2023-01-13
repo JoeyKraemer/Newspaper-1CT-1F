@@ -1,7 +1,11 @@
 <?php
+try{
+    $dbHandler = new PDO("mysql:host=mysql;dbname=gemorskos;charset=utf8", "root", "qwerty");
+}
+catch(Exception $ex){
+    echo "The following exception has occurred $ex";
+}
 $user_ID = 1;
-require_once("connection.php");
-global $dbHandler;
 $stmt = $dbHandler->prepare("SELECT photo FROM `Users`");
 $stmt->execute();
 $photos = $stmt->setFetchMode(PDO ::FETCH_OBJ);
@@ -31,12 +35,12 @@ foreach ($stmt->fetchall() as $photo) {
             </ul>
         </nav>
     </header>
-    <main>
+    <main>  
         <div id="content">
             <img src="upload/<?php echo $image ?>" alt="" id="circle">
             <?php
             $stmt = $dbHandler->prepare("SELECT first_name, last_name FROM `Users`
-											   WHERE Users.user_id = :userid");
+                                        WHERE Users.user_id = :userid");
             $stmt->bindParam('userid', $user_ID, PDO::PARAM_STR);
             $stmt->execute();
             $table = $stmt->setFetchMode(PDO::FETCH_OBJ);
@@ -51,7 +55,7 @@ foreach ($stmt->fetchall() as $photo) {
                 <?php
 
                 $stmt = $dbHandler->prepare("SELECT user_role, type_of_staff  FROM `Users`
-												   WHERE Users.user_id = :userid");
+                                             WHERE Users.user_id = :userid");
                 $stmt->bindParam('userid', $user_ID, PDO::PARAM_STR);
                 $stmt->execute();
                 $job = $stmt->setFetchMode(PDO::FETCH_OBJ);
