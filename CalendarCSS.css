@@ -68,6 +68,7 @@ li{
     font-weight: 400;
     grid-template-columns: repeat(8,1fr);
 }
+
 #dateAndEvents {
     display: flex;
     background-color: #50595B;

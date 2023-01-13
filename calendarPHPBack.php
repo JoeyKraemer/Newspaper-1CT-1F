@@ -79,7 +79,6 @@ for ($d = 1; $d <= $lastDay; $d++) {
         echo("</tr>");
         echo("<tr>");
     }
-    // <div id="date"><span style="font-size: 3em;" id="calendarDate">10</span><h3>January <br> 2023</h3></div>
 }
 echo("</tr>");
         ?>
