@@ -14,7 +14,6 @@ foreach($stmt-> fetchall() as $photo){
 	$image = $photo-> photo;
 }
 
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,13 +58,11 @@ foreach($stmt-> fetchall() as $photo){
 							$stmt -> execute();
 							$job = $stmt->setFetchMode(PDO::FETCH_OBJ); 
 
-
 								foreach($stmt->fetchall() as $jobs){
 
 									echo '<h2> Your Role: ' . $jobs->user_role .' '.  '</h2>';
 									echo '<h2>  Jobs:</h2>';
 								}
-
 
 							$stmt = $dbHandler->prepare("SELECT Events.event_name, Events.event_description, Events.event_date 
 																						FROM Events, Event_Details, Users
@@ -76,7 +73,6 @@ foreach($stmt-> fetchall() as $photo){
 							$stmt->bindParam('userid', $user_ID, PDO::PARAM_STR);
 							$stmt -> execute();
 							$jobName = $stmt->setFetchMode(PDO::FETCH_OBJ); 
-
 
 								foreach($stmt->fetchall() as $jobName){
 
