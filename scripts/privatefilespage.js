@@ -1,3 +1,4 @@
+// opens the context menu when clicking on the contextMenu button
 function openContext(i, filePath){
     const caller = document.getElementById(i).getElementsByClassName('options')[0];
     const menu = document.createElement('div');
@@ -31,6 +32,7 @@ function openContext(i, filePath){
     menu.style.top = rect.bottom + "px";
     menu.className = "contextMenu";
     menu.onclick = event=>event.stopPropagation();
+
     // assigns the attibutes onto menu
     styles = [["width", "fit-content"], ["height", "fit-content"], ["background-color", "lightGrey"], ['padding-bottom', '1vw'], ['padding-left', '0.5vw'], ['padding-right', '1vw']];
     styles.forEach(item => {
@@ -40,9 +42,12 @@ function openContext(i, filePath){
     document.body.appendChild(background);
 }
 
+// attempts to open the file select screen native to the browser
 function uploadFile(){
     document.getElementById('fileInput').click();
 }
+
+// sends a request to delete a file from the repository
 function deleteFile(fileName){
     document.getElementById('textInput').value = fileName;
     document.getElementById("requestType").value = "delete";

@@ -128,19 +128,6 @@
 
                 ?>
             </table>
-<!--		<div class="orgfile">
-				<div class="orgfiletext">
-					<h2> Organization Files </h2>
-				</div>
-					<div>
-						<ul>
-							<li> <a class="icons" href="#"> <img src="img/trash.png" alt="trashbutton"> </a> </li>
-							<li> <a class="icons" href="#"> <img src="img/upload.png" alt="uploadbutton"> </a> </li>
-							<li> <a class="icons" href="#"> <img src="img/caret_up.png" alt="caretbutton"> </a> </li>
-						</ul>
-				    </div>
-	            </div>
-	        </div> -->
 	    </main>
     </body>
     <footer>
@@ -162,4 +149,3 @@ function convertToReadableSize($size){
 
 ?>
 </html>
-
