@@ -69,8 +69,6 @@ table {
     padding-right: 50px;
     background-color: #FFFFFF;
     display: block;
-    flex: auto;
-
 }
 
 td, th {
@@ -98,7 +96,7 @@ a:visited{
 }
 
 a:hover{
-    text-decoration: none;
+    color: #F1F1F1;
 }
 
 a:active{
@@ -138,6 +136,7 @@ li{
 
 #date {
     display: flex;
+    flex-direction: row;
 }
 
 #date h3 {
@@ -158,6 +157,7 @@ li{
     background-color: #F1F1F1;
     padding: 1%;
     height: 470px;
+    justify-content: center;
 }
 
 /*Classes*/
@@ -169,4 +169,9 @@ li{
 
 .eventList{
     padding-right: 10%;
+}
+
+.monthSelect{
+    display: flex;
+    flex-direction: row;
 }
