@@ -27,8 +27,16 @@ if (!isset($_GET["event_date"])) {
 
 <div id="container">
     <header>
+        <p> Gemorskos </p>
+        <nav>
+            <ul>
+                <li> <a href="#"> <img src="../img/folder.svg" alt="filesbutton"/> </a> </li>
+                <li> <a href="#"> <img src="../img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                <li> <a href="#"> <img src="../img/person.svg" alt="profilebutton"/> </a> </li>
+            </ul>
+        </nav>
     </header>
-    <!--    --><?php
+        <?php
     //    if(isset($dbHandler)) {
     //        try {
     //            $welcomeUser = "Welcome, " . $_GET['user_name'];
@@ -43,7 +51,7 @@ if (!isset($_GET["event_date"])) {
     //
     //        }
     //    }
-    //    ?>
+        ?>
     <div id="calendar">
         <div id="dateAndEvents">
             <?php
@@ -166,6 +174,8 @@ if (!isset($_GET["event_date"])) {
             ?>
         </table>
     </div>
+    <footer>
+    </footer>
 </div>
 </body>
 </html>
