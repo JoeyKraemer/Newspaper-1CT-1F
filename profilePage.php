@@ -86,6 +86,7 @@ foreach ($stmt->fetchall() as $photo) {
             </div>
         </div>
     </main>
+    <footer></footer>
 </div>
 </body>
 </html>
