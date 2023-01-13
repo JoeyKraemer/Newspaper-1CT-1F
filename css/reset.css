@@ -1,0 +1,97 @@
+/* Media queries */
+@font-face {
+    font-family: 'Inter';
+    src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
+}
+
+/* HTML Tags */
+    html * {
+    font-family: Inter;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+    background-color:#B2BCBC;
+}
+
+main {
+    display: grid;
+    grid-column: 3/9;
+    background-color: #F1F1F1;
+    height: 100vh;
+}
+
+h1 { 
+    text-align: center;
+    font-weight: 400;
+    margin-top: 5.25rem;
+}
+
+a {
+    text-align: center;
+    text-decoration: none;
+    color: black;
+}
+
+input {
+    margin-bottom: 1.375rem;
+    text-align: center;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+form * {
+    border: none;
+}
+
+button {
+    width: 7.25rem;
+    height: 2.438rem;
+    margin-bottom: 1.375rem;
+    background-color: white;
+    border: none;
+}
+
+/* this element is hidden on the login page but is visible on the password recovery */
+p {
+/*  visibility: hidden; */
+    margin: 1rem 15.625rem 1.25rem 15.625rem;
+    text-align: center;
+    color: #8F8F8F;
+}
+
+/* Class */
+
+/* IDs */
+#container {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);	
+}
+
+#content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#pass1 {
+    width: 13.25rem;
+    height: 2.438rem;
+}
+
+#submit {
+    width: 7.25rem;
+    height: 2.438rem;
+    margin-bottom: 1.375rem;
+    background-color: white;
+}
+
+#pass2 {
+    width: 13.25rem;
+    height: 2.438rem;
+}
