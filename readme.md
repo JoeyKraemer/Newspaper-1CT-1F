@@ -34,11 +34,16 @@ This section is only for people that want to run our web-application in a docker
 - [Docker engine](https://docs.docker.com/engine/install/#server)
   - Select your distribution from the table and follow the provided instructions.
 
+
+#### Docker Container recommendation
+- We recommend to use the following docker environment 
+- [Docker Container](https://github.com/Schmitzenbergh/NHL_Stenden_PHP_Docker_Env)
+
 ### Running
 
 1. Download the archive containing the necessary files.
-2. Extract the files to a folder in which you will start our project. 
-3. Change the filename of ".env.TEMPLATE" into ".env" and change the database details to your own settings
+2. Extract the files to the docker folder structure  in which you will start our project. (The project files should be placed into the /app/public directory)
+3. Change the filename of ".env.TEMPLATE" into ".env", change the database details to your own settings and also the mail credentials to your own Gmail (our password recovery is designed to work with GMAIL)
 
 ``` .env 
 #Specific project name
@@ -48,6 +53,9 @@ COMPOSE_PROJECT_NAME="your_project"
 DB_SERVER="your_database"
 DB_ROOT_USER="your_database_user"
 DB_ROOT_PASSWORD="your_database_password"
+
+MAIL_ADDRESS="your@gmail.com"
+MAIL_PASSWORD="your password"
 
 ```
 
@@ -62,40 +70,6 @@ docker-compose up
 7. Open [PHPmyAdmin](http://127.0.0.1:8080), enter your database login data you set in step 3. to login.
 8. Import the "DatabaseStructure.SQL" in PHPmyAdmin. Check if the database appears on the left side of the screen
 9. Got to [127.0.0.1](http://127.0.0.1)  in your favorite browser. 
-10. Login to the web-application, the admin account is pre set for your. Username: "Admin", Password: "qwerty"
+10. Login to the web-application, the admin account is pre set for your. Username: "Admin", Password: "user123" (you will be asked to change it, first time login in)
 11. Now, that you are logged in you can fully enjoy and configurade the web-application to your needs.
 12. Enjoy
-
-#### Linux server
-For you too run this on your own server, you need the following services pre-installed
-
-### Prerequisites
-- Apache2
-- PHP 8.1
-- Database server (we recommend mariadb)
-- PHPmyAdmin
-
-### Running
-
-1. Download the archive containing the necessary files.
-2. Extract the files to "/var/www/ which is your web-server directory. 
-3. Change the filename of ".env.TEMPLATE" into ".env" and change the database details to your own settings
-
-``` .env 
-#Specific project name
-COMPOSE_PROJECT_NAME="your_project"
-
-# Environment Variables for database.
-DB_SERVER="your_database"
-DB_ROOT_USER="your_database_user"
-DB_ROOT_PASSWORD="your_database_password"
-
-```
-
-4. Move the ".env" file into your docker-container. It needs to be in the same folder where your "docker-compose.yaml" is.
-5. Open [PHPmyAdmin](http://127.0.0.1:8080), enter your database login data you set in step 3. to login.
-6. Import the "DatabaseStructure.SQL" in PHPmyAdmin. Check if the database appears on the left side of the screen
-7. Got to [127.0.0.1](http://127.0.0.1)  in your favorite browser. 
-8. Login to the web-application, the admin account is pre set for your. Username: "Admin", Password: "qwerty"
-9. Now, that you are logged in you can fully enjoy and configurade the web-application to your needs.
-10. Enjoy

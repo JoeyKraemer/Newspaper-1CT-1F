@@ -10,12 +10,13 @@ else{
     exit;
 }
 
+$dbname = "gemorskos";
 // sets month based on session
 if (!isset($_SESSION["month"])) {
     $_SESSION["month"] = intval(date("m"));
 }
 try{
-    $dbHandler = new PDO("mysql:host=mysql;dbname=gemorskos;charset=utf8", "root", "qwerty");
+    $dbHandler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
 }
 catch(Exception $ex){
     echo "The following exception has occurred $ex";
@@ -178,13 +179,6 @@ catch(Exception $ex){
             echo("<tr>");
             echo("</tr>");
             echo("<tr>");
-//            echo("<td>S</td>");
-//            echo("<td>M</td>");
-//            echo("<td>T</td>");
-//            echo("<td>W</td>");
-//            echo("<td>T</td>");
-//            echo("<td>F</td>");
-//            echo("<td>S</td>");
             echo("</tr>");
 
             $startDay = 0;
@@ -216,7 +210,6 @@ catch(Exception $ex){
                 }
             }
             echo("</tr>");
-            // TODO: Welcome user
             ?>
         </table>
     </div>

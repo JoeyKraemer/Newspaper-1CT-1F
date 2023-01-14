@@ -92,6 +92,7 @@ foreach ($stmt->fetchall() as $photo) {
                 }
                 ?>
                 <a href="calendar.php"> Calendar/schedule </a>
+                <a href="passwordChange.php"> Change passsword</a>
                 <a href="recover.php"> Forgot your password? </a>
                 <h2>Change your profile picture</h2>
                 <form action="file.php" enctype="multipart/form-data" method="POST">

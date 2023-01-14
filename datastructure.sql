@@ -70,3 +70,20 @@ CREATE TABLE pwdReset (
     pwdResetToken LONGTEXT NOT NULL,
     pwdResetExpires TEXT NOT NULL
 );
+
+-- Inserts for Types of Staff
+INSERT INTO `TypesOfStaff`(type_of_staff_id,type_of_staff_description)VALUES(NOT NULL,"Employee");
+INSERT INTO `TypesOfStaff`(type_of_staff_id,type_of_staff_description)VALUES(NOT NULL,"Freelancer");
+INSERT INTO `TypesOfStaff`(type_of_staff_id,type_of_staff_description)VALUES(NOT NULL,"Management");
+-- Inserts for Roles
+INSERT INTO `Roles`(role_id,role_name,role_description)VALUES(NOT NULL,"Editor","Person that writes articles based on content they get from photographer");
+INSERT INTO `Roles`(role_id,role_name,role_description)VALUES(NOT NULL,"Photographer","Person that takes photos of events");
+INSERT INTO `Roles`(role_id,role_name,role_description)VALUES(NOT NULL,"IT-Specialist","Person that takes care of the system and has Admin priviliges");
+INSERT INTO `Roles`(role_id,role_name,role_description)VALUES(NOT NULL,"Journalist","Person that visits events");
+
+-- Admin account, first login, add your mail address, to recieve mails for password recovery
+INSERT INTO `Users` (`user_id`, `user_password`, `password_change_date`, `first_name`, `last_name`, `email_address`, `type_of_staff`, `user_role`, `active`, `photo`) VALUES
+(2, '$2y$10$ZGjbEOcewuYVSmkRprbiA.sQRQcK/yiNdyo6L5f5bOA0ZgDGykp.G', NOT NULL, 'Admin', 'Admin', 'your@mail.com', 3, 3, 1, NULL);
+
+
+
