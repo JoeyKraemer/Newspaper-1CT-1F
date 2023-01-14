@@ -68,8 +68,9 @@ docker-compose up
 ```
 6. Wait a few seconds till the docker-container is running. (First time you docker-compose up your it will take a moment)
 7. Open [PHPmyAdmin](http://127.0.0.1:8080), enter your database login data you set in step 3. to login.
-8. Import the "DatabaseStructure.SQL" in PHPmyAdmin. Check if the database appears on the left side of the screen
-9. Got to [127.0.0.1](http://127.0.0.1)  in your favorite browser. 
-10. Login to the web-application, the admin account is pre set for your. Username: "Admin", Password: "user123" (you will be asked to change it, first time login in)
-11. Now, that you are logged in you can fully enjoy and configurade the web-application to your needs.
-12. Enjoy
+8. Change credentials from Admin user on Line: 85, please replace the placeholder mail with your own to make the password recovery work.
+9. Import the "DatabaseStructure.SQL" in PHPmyAdmin. Check if the database appears on the left side of the screen
+10. Got to [127.0.0.1](http://127.0.0.1)  in your favorite browser. 
+11. Login to the web-application, the admin account is pre set for your. Username: "Admin", Password: "user123" (you will be asked to change it, first time login in)
+12. Now, that you are logged in you can fully enjoy and configurade the web-application to your needs.
+13. Enjoy
