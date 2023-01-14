@@ -3,10 +3,12 @@
 
 
 if($_SERVER['REQUEST_METHOD'] == 'POST'){
-
-    require_once("connection.php");
-
-    global $dbHandler;
+    try{
+        $dbHandler = new PDO("mysql:host=mysql;dbname=gemorskos;charset=utf8", "root", "qwerty");
+    }
+    catch(Exception $ex){
+        echo "The following exception has occurred $ex";
+    }
 
     if ($_FILES["file"]["error"]>0)
     {
