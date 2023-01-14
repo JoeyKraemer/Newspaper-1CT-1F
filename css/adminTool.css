@@ -1,76 +1,82 @@
-html, body{
-    margin: 0;
-    padding: 0;
-}
-table, th, td {
-    border: 1px solid;
+@font-face {
+font-family: 'Inter';
+src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
 }
 
-.errormessage{
-    color: darkred;
-}
-
-body{
-    background-color: #B2BCBC;
+body {
     display: grid;
-    grid-template-columns: 20vw 30vw 30vw 20vw;
+    grid-template-columns: repeat(10, 1fr);
+    background-color:#B2BCBC;
+    font-family: Inter;
 }
 nav{
-    background-color: #50595B;
-    width:  fit-content;
-    height: fit-content;
-    padding: 0.5vw;
-    justify-self: end;
-}
-nav>a {
-    color: #F1F1F1;
-    font-size: 1.3rem;
-}
-#main{
-    background-color: #F1F1F1;
     grid-column: 2/4;
-    display: inline-grid;
-    justify-content: center;
-    height: 100vh;
+    background-color: #F1F1F1;
 }
-#main2{
-    justify-content: center;
-    display: grid;
-    width: 55vw;
-    height: 10vw;
+main{
+    grid-column: 4/10;
+    background-color: #FFFF;
 }
-
-#searchbar{
-    justify-self: center;
+button{
+    background-color: #FFFF;
+    border: 2px;
 }
-
-#main2>table td{
-    height: 1rem;
-    min-width: 2vw;
+input{
+    text-align: center;
 }
-#main2>table th{
-    height: 16px;
-    padding-right: 0.4vw;
-    padding-left: 0.4vw;
+option{
+    text-align: center;
 }
 
-#main2>form{
-    display: grid;
-    grid-template-columns: auto 8vw auto;
+#customers {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
 }
-#main2>form label{
-    grid-column: 2/3;
-    justify-self: start;
+
+#customers td, #customers th {
+    border: px solid #ddd;
+    padding: 8px;
 }
-#main2>form input{
-    grid-column: 3/4;
-    justify-self: start;
+
+.parent {
+    margin: 20px 20px 20px 20px;
+    text-align: left;
+    background-color: #F1F1F1;
 }
-#main2>form select{
-    grid-column: 3/4;
-    justify-self: start;
+
+.Addusertab {
+    text-align: center;
+    
 }
-#main2>form textarea{
-    grid-column: 3/4;
-    justify-self: start;
+.Adduserheading{
+    margin-bottom: 40px;
+    margin-top: 20px;
+
+}
+.inputtext{
+    padding: 6px;
+    margin-bottom: 10px;
+
+}
+.inputdropdown{
+    padding: 6px;
+    margin-bottom: 10px;
+    width: 180px;
+}
+
+
+.tableheader{
+    display: inline-block;
+    padding: 1rem 1rem;
+    border: 0px solid red;
+    vertical-align: middle;
+    background-color: #FFFF;
+}
+
+th, td, tr {
+    padding:8px;
+    text-align: center;
+    border-bottom: 2px solid #B2BCBC;
+    border-top: 1px solid #B2BCBC;
 }

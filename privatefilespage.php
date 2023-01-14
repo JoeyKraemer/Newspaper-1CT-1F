@@ -16,11 +16,18 @@ else{
         <link rel= "stylesheet" href="css/privatefilespage.css">
         <link rel="stylesheet" href="css/headerStyle.css">
     </head>
+    <body>
+        <header>
+
+        </header>
+        <main>
+
     <?php
     //placeholders
     $permissions = true;
     $maxFileSize = 10*1024*1024; //10mb
-    $filePath = "repository/";
+    $baseFilePath = "repository/";
+    $filePath = "";
 
     $dbname = "gemorskos";
 
@@ -35,97 +42,92 @@ else{
         }
     }
 
-    $users = scandir($filePath);
+    // looks to match user id with folder in baseFilePath (followed by _). i.e. Repository/1_jordan_cook
+    $users = scandir($baseFilePath);
     foreach($users as $user){
         if(preg_match("/^{$user_id}_.*$/", $user)){
-            $filePath = "repository/{$user}/";
+            $filePath = "$baseFilePath{$user}/";
             break;
         }
     }
 
-    // for upload/delete operations
-    if($_SERVER['REQUEST_METHOD'] == 'POST'){
-        $errorMsg = [];
-        switch($_POST['requestType']){
-            case 'upload':
-                $file = $_FILES["file"];
-                if ($file["error"] !== 0){
-                    $errorMsg[] = "an error has occured";
 
-                } else {
-                    if ($file['size'] > $maxFileSize){
-                        $errorMsg[] = "size can only be a maximum of". ConvertToReadableSize($maxFileSize);
-                    }
-                    if (file_exists($filePath . $file["name"])){
-                        $errorMsg[] = "that filename already exists";
-                    }
+    // normal execution when the file path isn't empty
+    if ($filePath){
+        // for upload/delete operations
+        if($_SERVER['REQUEST_METHOD'] == 'POST'){
+            
+            
+            $errorMsg = [];
+            switch($_POST['requestType']){
+                case 'upload':
+                    $i = 0;
+                    while ($i < count($_FILES["file"]["name"])){
+                        $file = $_FILES["file"];
+                        if ($file["error"][$i] !== 0){
+                            $errorMsg[] = "an error has occured";
 
-                    if(!count($errorMsg) == 0){
-                        $fullMsg = "";
-                        foreach($errorMsg as $item){
-                            $fullMsg .= "$item. ";
+                        } else {
+                            if ($file['size'][$i] > $maxFileSize){
+                                $errorMsg[] = "size can only be a maximum of". ConvertToReadableSize($maxFileSize);
+                            }
+                            if (file_exists($filePath . $file["name"][$i])){
+                                $errorMsg[] = "that filename already exists";
+                            }
+
+                            if(!count($errorMsg) == 0){
+                                $fullMsg = "";
+                                foreach($errorMsg as $item){
+                                    $fullMsg .= "$item. ";
+                                }
+
+                                echo "<script type='text/javascript'>alert('$fullMsg');</script>";
+                            } else {
+                                // uploads file
+                                if (!move_uploaded_file($file["tmp_name"][$i], "$filePath" . $file["name"][$i])) {
+                                    echo "<script type='text/javascript'>alert('something went wrong while uploading.');</script>";
+                                }
+                            }
+
                         }
+                        $i++;
+                    }
+                    break;
 
-                        echo "<script type='text/javascript'>alert('$fullMsg');</script>";
-                    } else {
-                        // uploads file
-                        if (!move_uploaded_file($file["tmp_name"], "$filePath" . $file["name"])) {
-                            echo "<script type='text/javascript'>alert('something went wrong while uploading.');</script>";
+                case 'delete':
+                    $fileName = filter_input(INPUT_POST, 'text', FILTER_SANITIZE_SPECIAL_CHARS);
+                    if (file_exists($filePath . $fileName)){
+                        if(!unlink($filePath . $fileName)){
+                            echo "<script type='text/javascript'>alert('something went wrong while deleting the file');</script>";
                         }
                     }
-
-                }
-                break;
-
-            case 'delete':
-                $fileName = filter_input(INPUT_POST, 'text', FILTER_SANITIZE_SPECIAL_CHARS);
-                if (file_exists($filePath . $fileName)){
-                    if(!unlink($filePath . $fileName)){
-                        echo "<script type='text/javascript'>alert('something went wrong while deleting the file');</script>";
+                    else {
+                        echo "<script type='text/javascript'>alert('the file does not exist');</script>";
                     }
-                }
-                else {
-                    echo "<script type='text/javascript'>alert('the file does not exist');</script>";
-                }
+            }
         }
-    }
-    //
-    ?>
-
-    <body>
-        <header>
-            <p> Gemorskos </p>
-            <nav>
-                <ul>
-                    <li> <a href="privateFilesPage.php"> <img src="img/folder.svg" alt="filesbutton"/> </a> </li>
-                    <li> <a href="calendar.php"> <img src="img/calendar.svg" alt="calendarbutton"/> </a> </li>
-                    <li> <a href="profilePage.php"> <img src="img/person.svg" alt="profilebutton"/> </a> </li>
-                </ul>
-            </nav>
-        </header>
-        <div class='falseHeader'></div>
-	    <main>
-			<div id="myfile">
-				<div class="myfiletext">
-					<h2>My Files</h2>
-				</div>
-				<div class="uploadicons">
-					<ul>
-						<!-- <li> <a class="icons" href="#"> <img src="img/trash.png" alt="trashbutton"> </a> </li> obsolete -->
-						<li> <a class="icons" href="#" onclick="uploadFile()"> <img src="img/upload.png" alt="uploadbutton"> </a> </li>
-						<!-- <li> <a class="icons" href="#"> <img src="img/caret_up.png" alt="caretbutton"> </a> </li> obsolete -->
-					</ul>
-				</div>
-			</div>
-			<table id='filesTable'>
-                <?php
+        ?>
+            <div id="myfile">
+                <div class="myfiletext">
+                    <h2>My Files</h2>
+                </div>
+                <div class="uploadicons">
+                    <ul>
+                        <!-- <li> <a class="icons" href="#"> <img src="img/trash.png" alt="trashbutton"> </a> </li> obsolete -->
+                        <li> <a class="icons" href="#" onclick="uploadFile()"> <img src="img/upload.png" alt="uploadbutton"> </a> </li>
+                        <!-- <li> <a class="icons" href="#"> <img src="img/caret_up.png" alt="caretbutton"> </a> </li> obsolete -->
+                    </ul>
+                </div>
+            </div>
+            <table id='filesTable'>
+                <?php   
+                    // for viewing the files
                     $i = 0;
                     foreach(scandir($filePath) as $file_name){
-                        if($file_name == '.' OR $file_name == '..'){
+                       if($file_name == '.' OR $file_name == '..'){
                             continue;
                         }else{
                             $i++;
-                            // filesize() and filectime() do NOT work on folders made by php
 
                             $file_size = convertToReadableSize(filesize("{$filePath}{$file_name}"));
                             $file_ctime = filectime("{$filePath}{$file_name}");
@@ -141,15 +143,28 @@ else{
                             ";
                         }
                     }
+                    if($i == 0){
+                        echo('<p>*empty*</p>');
+                    }
 
 
                 ?>
-            </table>
-	    </main>
+                </table>
+            </main>
+    <?php
+    // if when the file path could not be established (no such user)
+    } else {
+        echo "<p>There is no such folder with that ID number</p>
+            <p>Please seek help from an IT member</p>
+            <a href='index.php'>Home</a>
+        ";
+    }
+    ?>
     </body>
+    
     <footer>
         <form action="privatefilespage.php" method="post" id="form" enctype="multipart/form-data">
-            <input type="file" name="file" id="fileInput">
+            <input type="file" name="file[]" id="fileInput" multiple>
             <input type="text" name="text" id="textInput">
             <input type="hidden" name="requestType" id="requestType">
             <input type="submit" id="submitInput">
