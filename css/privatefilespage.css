@@ -35,7 +35,7 @@ header {
 main {
     grid-column: 2/10;
     background-color: #F1F1F1;
-    height: calc(100vh - 4.53vw);
+    height: calc(100vh - 4.53vw - 89px);
 }
 
 ul li {

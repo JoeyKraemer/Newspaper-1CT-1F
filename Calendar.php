@@ -1,5 +1,16 @@
 <?php
 session_start();
+
+// sets user or redirects page
+if(isset($_SESSION['user'])){
+    $user_id = intval($_SESSION['user']);
+}
+else{
+    header('Location: login.php');
+    exit;
+}
+
+// sets month based on session
 if (!isset($_SESSION["month"])) {
     $_SESSION["month"] = intval(date("m"));
 }
@@ -15,8 +26,10 @@ catch(Exception $ex){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link type="text/css" rel="stylesheet" href="css/CalendarCSS.css">
+    <title> Calendar </title>
+    <link type="text/css" rel="stylesheet" href="css/calendarPage.css">
     <link type="text/css" rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/headerStyle.css">
     <title>Title</title>
     <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -28,12 +41,13 @@ catch(Exception $ex){
         <p> Gemorskos </p>
         <nav>
             <ul>
-                <li> <a href="#"> <img src="../img/folder.svg" alt="filesbutton"/> </a> </li>
-                <li> <a href="#"> <img src="../img/calendar.svg" alt="calendarbutton"/> </a> </li>
-                <li> <a href="#"> <img src="../img/person.svg" alt="profilebutton"/> </a> </li>
+                <li> <a href="privateFilesPage.php"> <img src="../img/folder.svg" alt="filesbutton"/> </a> </li>
+                <li> <a href="calendar.php"> <img src="../img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                <li> <a href="profilePage.php"> <img src="../img/person.svg" alt="profilebutton"/> </a> </li>
             </ul>
         </nav>
     </header>
+    <div class='falseHeader'></div>
         <?php
         if(isset($dbHandler)) {
             try {
@@ -207,6 +221,7 @@ catch(Exception $ex){
         </table>
     </div>
     <footer>
+        <a href='eventTool.php'> Access Events Tool </a>
     </footer>
 </div>
 </body>

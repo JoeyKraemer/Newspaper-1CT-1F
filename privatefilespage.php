@@ -18,8 +18,16 @@ else{
     </head>
     <body>
         <header>
-
+            <p> Gemorskos </p>
+            <nav>
+                <ul>
+                    <li> <a href="privateFilesPage.php"> <img src="img/folder.svg" alt="filesbutton"/> </a> </li>
+                    <li> <a href="calendar.php"> <img src="img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                    <li> <a href="profilePage.php"> <img src="img/person.svg" alt="profilebutton"/> </a> </li>
+                </ul>
+            </nav>
         </header>
+        <div class='falseHeader'></div>
         <main>
 
     <?php
