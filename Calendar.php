@@ -37,7 +37,7 @@ catch(Exception $ex){
         <?php
         if(isset($dbHandler)) {
             try {
-                $welcomeUser = "Welcome, " . $_GET['user_id'];
+                //$welcomeUser = "Welcome, " . $_GET['user_id'];
                 $userstmt = $dbHandler->prepare("SELECT * FROM `Users` WHERE user_id = 7");
                 $userstmt->bindParam('user_id', $welcomeUser, PDO::PARAM_STR);
 
