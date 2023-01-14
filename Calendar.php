@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION["month"])) {
-    $_SESSION["month"] = date("m");
+    $_SESSION["month"] = intval(date("m"));
 }
 try{
     $dbHandler = new PDO("mysql:host=mysql;dbname=gemorskos;charset=utf8", "root", "qwerty");
@@ -164,13 +164,13 @@ catch(Exception $ex){
             echo("<tr>");
             echo("</tr>");
             echo("<tr>");
-            echo("<td>S</td>");
-            echo("<td>M</td>");
-            echo("<td>T</td>");
-            echo("<td>W</td>");
-            echo("<td>T</td>");
-            echo("<td>F</td>");
-            echo("<td>S</td>");
+//            echo("<td>S</td>");
+//            echo("<td>M</td>");
+//            echo("<td>T</td>");
+//            echo("<td>W</td>");
+//            echo("<td>T</td>");
+//            echo("<td>F</td>");
+//            echo("<td>S</td>");
             echo("</tr>");
 
             $startDay = 0;
