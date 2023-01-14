@@ -1,15 +1,24 @@
+<?php
+session_start();
+if(isset($_SESSION['user'])){
+    $user_id = intval($_SESSION['user']);
+}
+else{
+    header('Location: login.php');
+    exit;
+}
+?>
 <!doctype html>
 <html>
     <head>
         <meta charset="UTF8">
         <title> Gemorskos </title>
         <link rel= "stylesheet" href="css/privatefilespage.css">
+        <link rel="stylesheet" href="css/headerStyle.css">
     </head>
-
     <?php
     //placeholders
     $permissions = true;
-    $user_id = 2;
     $maxFileSize = 10*1024*1024; //10mb
     $filePath = "repository/";
 
@@ -85,8 +94,16 @@
 
     <body>
         <header>
-
+            <p> Gemorskos </p>
+            <nav>
+                <ul>
+                    <li> <a href="privateFilesPage.php"> <img src="img/folder.svg" alt="filesbutton"/> </a> </li>
+                    <li> <a href="calendar.php"> <img src="img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                    <li> <a href="profilePage.php"> <img src="img/person.svg" alt="profilebutton"/> </a> </li>
+                </ul>
+            </nav>
         </header>
+        <div class='falseHeader'></div>
 	    <main>
 			<div id="myfile">
 				<div class="myfiletext">

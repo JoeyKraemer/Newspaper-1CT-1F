@@ -10,6 +10,16 @@ html, body {
     padding: 0;
 }
 
+/* hide scrollbar */
+html::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
 body {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -24,7 +34,7 @@ header {
 main {
     grid-column: 2/10;
     background-color: #F1F1F1;
-    height: 100vh;
+    height: calc(100vh - 4.53vw);
 }
 
 ul li {
@@ -92,6 +102,7 @@ ul {
     margin-left: auto;
     margin-right: auto;
     height: 2.8rem;
+    overflow-y: scroll;
 }
 
 #filesTable tr {

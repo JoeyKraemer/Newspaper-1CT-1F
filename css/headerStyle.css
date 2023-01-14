@@ -15,15 +15,23 @@ body {
 header {
     grid-column: 1/11;
     background-color:#50595B;
-    color: #F1F1F1;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    height: 4.53vw; /* 116/2560*100 */
+    position: fixed;
+}
+.falseHeader {
+    height: 4.53vw; /* 116/2560*100 */;
+    grid-column: 1/11;
+    width: 100%;
 }
 
 header p {
     font-size: 2.25rem;
     margin-left: 1.25rem;
+    color: #F1F1F1;
 }
 
 nav ul {

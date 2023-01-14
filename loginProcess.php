@@ -17,10 +17,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $stmt->bindColumn("email_address",$dbEmail);
     $stmt->bindColumn("user_password",$dbPassword);
+    $stmt->bindColumn("user_id",$user_id);
     $stmt->fetch();
     if (!is_null($dbEmail)) {
         if (password_verify($password,$dbPassword)) {
-            $_SESSION["user"] = $email;
+            $_SESSION["user"] = $user_id;
             Header("Location:index.php");
         }
         else{

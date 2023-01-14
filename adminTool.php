@@ -1,3 +1,24 @@
+<?php
+session_start();
+if(isset($_SESSION['user'])){
+    $user_id = intval($_SESSION['user']);
+}
+else{
+    header('Location: login.php');
+    exit;
+}
+
+$dbname = "gemorskos";
+$defaultPass = "user123"; // default pass for all users (they will be asked to change it asap)
+
+try{
+    $handler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
+}
+catch(Exception $ex){
+    print $ex;
+}
+
+?>
 <!DOCTYPE HTML>
 <html>
     <head>
@@ -5,21 +26,20 @@
         <meta charset="UTF-8">
         <script type="text/javascript" src="scripts/adminTool.js"></script>
         <link rel="stylesheet" type="text/css" href="css/adminTool.css">
+        <link rel="stylesheet" href="css/headerStyle.css">
     </head>
     <body>
-        <?php
-        //placeholder
-        $dbname = "gemorskos";
-        $userLoggedIn = true;
-        $permissions = true;
-        $defaultPass = "user123"; // default pass for all users (they will be asked to change it asap)
-        try{
-            $handler = new PDO("mysql:host={$_ENV["DB_SERVER"]}; dbname=$dbname; charset=utf8", $_ENV["DB_USER"], $_ENV["DB_PASSWORD"]);
-        }
-        catch(Exception $ex){
-            print $ex;
-        }
-        ?>
+        <header>
+            <p> Gemorskos </p>
+            <nav>
+                <ul>
+                    <li> <a href="privateFilesPage.php"> <img src="img/folder.svg" alt="filesbutton"/> </a> </li>
+                    <li> <a href="calendar.php"> <img src="img/calendar.svg" alt="calendarbutton"/> </a> </li>
+                    <li> <a href="profilePage.php"> <img src="img/person.svg" alt="profilebutton"/> </a> </li>
+                </ul>
+            </nav>
+        </header>
+        <div class='falseHeader'></div>
         <nav>
             <a href="adminTool.php?view=TypesOfStaff">Staff Types</a> <br/>
             <a href="adminTool.php?view=Roles">Roles</a> <br/>
@@ -27,8 +47,21 @@
             <a href="adminTool.php?view=Users">Users</a> <br/>
             <a href="adminTool.php?view=EventDetails">Event details</a> <br/>
         </nav>
-
+        <div id='main'>
+            <div id='main2'>
         <?php
+
+        // check if user is allowed access to this page
+        $stmt = $handler->prepare("SELECT type_of_staff FROM `Users` WHERE user_id = :user_id");
+        $stmt->bindParam('user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        if($result[0] != 1){
+            echo "<h1>user is not allowed access to this page</h1>";
+            exit;
+        }
+
         //Data manipulation functionality
         if($_SERVER["REQUEST_METHOD"] == "POST"){
             $errorMsg = [];
@@ -443,551 +476,547 @@
             }
         }
 
-        //show functionality
-        if($userLoggedIn && $permissions) { // get amount of entries to show
+        // show data functionality section
+        
+        $view = "";
+        if(isset($_GET["view"])){
+            $view = filter_input(INPUT_GET, 'view', FILTER_SANITIZE_SPECIAL_CHARS);
+        }
 
-            $view = "";
-            if(isset($_GET["view"])){
-                $view = filter_input(INPUT_GET, 'view', FILTER_SANITIZE_SPECIAL_CHARS);
+        $show = 25;  // default of 25 entries
+        if (isset($_GET["show"])) {
+            if (is_numeric($_GET["show"])) {
+                $show = $_GET["show"];
             }
+        }
 
-            $show = 25;  // default of 25 entries
-            if (isset($_GET["show"])) {
-                if (is_numeric($_GET["show"])) {
-                    $show = $_GET["show"];
-                }
+        $page = 1;  // default page 1
+        if (isset($_GET["page"])) { // get current page of entries
+            if (is_numeric($_GET["page"])) {
+                $page = (int)$_GET["page"];
             }
+        }
+        $offset = (($page - 1) * $show);
 
-            $page = 1;  // default page 1
-            if (isset($_GET["page"])) { // get current page of entries
-                if (is_numeric($_GET["page"])) {
-                    $page = (int)$_GET["page"];
-                }
-            }
-            $offset = (($page - 1) * $show);
+        // searchbar functionality
+        if(isset($_GET['search'])){
+            $search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_SPECIAL_CHARS);
+        }
 
-            if(isset($_GET['search'])){
-                $search = filter_input(INPUT_GET, 'search', FILTER_SANITIZE_SPECIAL_CHARS);
-            }
+        echo "
+            <div id='searchbar'>
+                <br/>
+                <form action='adminTool.php' method='get'>
+                    <input type='hidden' name='view' value=$view>
+                    <input type='hidden' name='show' value=$show>
+                    <input type='hidden' name='page' value=$page>
+                    <input type='text' name='search' placeholder='search'". (isset($search)?"value='$search'":"")."/>
+                    <input type='submit'/>
+                </form>
+            </div>
+        ";
 
-            echo "
-            <div id='main'>
-                <div id='main2'>
-                    <div id='searchbar'>
-                        <br/>
-                        <form action='adminTool.php' method='get'>
-                            <input type='hidden' name='view' value=$view>
-                            <input type='hidden' name='show' value=$show>
-                            <input type='hidden' name='page' value=$page>
-                            <input type='text' name='search' placeholder='search'/>
-                            <input type='submit'/>
-                        </form>
-                    </div>
-            ";
-
-            if(isset($_GET['view'])){
-                $view = $_GET['view'];
-                $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}" . (isset($search)?"&page={$search}":"");
+        if(isset($_GET['view'])){
+            $view = $_GET['view'];
+            $returnLink = "adminTool.php?view={$view}&show={$show}&page={$page}" . (isset($search)?"&page={$search}":"");
 
 
-                // shows the users database
-                switch ($view) {
+            // shows the users database
+            switch ($view) {
 
-                    // when showing types of staff page
-                    case 'TypesOfStaff':
+                // when showing types of staff page
+                case 'TypesOfStaff':
 
-                        $sort = 'type_of_staff_id';
-                        if (isset($_GET["sort"])){
-                            if ($_GET["sort"] == 'description') {
-                                $sort = 'type_of_staff_description';
-                            }
+                    $sort = 'type_of_staff_id';
+                    if (isset($_GET["sort"])){
+                        if ($_GET["sort"] == 'description') {
+                            $sort = 'type_of_staff_description';
                         }
+                    }
 
-                        $where = "";
-                        if(isset($search) AND $search){
-                            $where = " WHERE type_of_staff_description LIKE '%{$search}%'";
-                        }
+                    $where = "";
+                    if(isset($search) AND $search){
+                        $where = " WHERE type_of_staff_description LIKE '%{$search}%'";
+                    }
 
-                        // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
-                        $stmt->bindParam('show', $show, PDO::PARAM_INT);
-                        $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $result = $stmt->fetchAll();
+                    // prepares the query and fetches the results
+                    $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                    $stmt->bindParam('show', $show, PDO::PARAM_INT);
+                    $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetchAll();
 
 
+                    echo "
+                    <h1>Account Types</h1>
+                    <table id='typeTable'>
+                        <tr>
+                            <th> <a href='{$returnLink}&sort=id'>Type</a> </th>
+                            <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
+                        </tr>
+                    ";
+
+                    // adds the staff entries to the table
+                    foreach ($result as $entry) {
                         echo "
-                        <h1>Account Types</h1>
-                        <table id='typeTable'>
-                            <tr>
-                                <th> <a href='{$returnLink}&sort=id'>Type</a> </th>
-                                <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
+                            <tr class='{$entry['type_of_staff_id']}'>
+                                <td> {$entry['type_of_staff_id']} </td>
+                                <td> <div class='description'>{$entry['type_of_staff_description']}</div></td>
+                                <!-- <td> <a href='javascript:updateStaffType({$entry['type_of_staff_id']})'> save changes </a> </td> --> <!-- allowing edits for this might be outside the scope -->
                             </tr>
                         ";
+                    }
 
-                        // adds the staff entries to the table
-                        foreach ($result as $entry) {
-                            echo "
-                                <tr class='{$entry['type_of_staff_id']}'>
-                                    <td> {$entry['type_of_staff_id']} </td>
-                                    <td> <div class='description'>{$entry['type_of_staff_description']}</div></td>
-                                    <!-- <td> <a href='javascript:updateStaffType({$entry['type_of_staff_id']})'> save changes </a> </td> --> <!-- allowing edits for this might be outside the scope -->
-                                </tr>
-                            ";
+                    echo "</table>";
+
+                    break;
+
+                // when showing Roles page
+                case 'Roles':
+
+                    $sort = 'role_id';
+                    if (isset($_GET["sort"])){
+                        switch ($_GET["sort"]) {
+                            case 'name':
+                                $sort = 'role_name';
+                                break;
+                            case 'description':
+                                $sort = 'role_description';
+                                break;
                         }
+                    }
 
-                        echo "</table>";
+                    $where = "";
+                    if(isset($search) AND $search){
+                        $where = " WHERE role_name LIKE '%{$search}%' OR role_description LIKE '%{$search}%'";
+                    }
 
-                        break;
+                    // prepares the query and fetches the results
+                    $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                    $stmt->bindParam('show', $show, PDO::PARAM_INT);
+                    $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetchAll();
 
-                    // when showing Roles page
-                    case 'Roles':
+                    echo "
+                    <h1>Roles</h1>
+                    <table>
+                        <tr>
+                            <th> <a href='{$returnLink}&sort=id'>Role</a> </th>
+                            <th> <a href='{$returnLink}&sort=name'>Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
+                            <th> Edit </th>
+                        </tr>
+                    ";
 
-                        $sort = 'role_id';
-                        if (isset($_GET["sort"])){
-                            switch ($_GET["sort"]) {
-                                case 'name':
-                                    $sort = 'role_name';
-                                    break;
-                                case 'description':
-                                    $sort = 'role_description';
-                                    break;
-                            }
-                        }
-
-                        $where = "";
-                        if(isset($search) AND $search){
-                            $where = " WHERE role_name LIKE '%{$search}%' OR role_description LIKE '%{$search}%'";
-                        }
-
-                        // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT role_id, role_name, role_description  FROM `Roles`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
-                        $stmt->bindParam('show', $show, PDO::PARAM_INT);
-                        $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $result = $stmt->fetchAll();
-
+                    foreach ($result as $entry) {
                         echo "
-                        <h1>Roles</h1>
+                            <tr class='{$entry['role_id']}'>
+                                <td> {$entry['role_id']} </td>
+                                <td> <div contenteditable class='role_name'>{$entry['role_name']}</div></td>
+                                <td> <div contenteditable class='role_description'>{$entry['role_description']}</div></td>
+                                <td> <a href='javascript:updateRole({$entry['role_id']})'> save changes </a> </td>
+                            </tr>
+                        ";
+                    }
+
+                    $stmt = $handler->prepare("SELECT count(role_id) FROM `Roles`");
+                    $stmt-> execute();
+                    $result = $stmt->fetch();
+
+                    echo "
+                        </table>
+                        <div id='pageNav'>
+                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
+                        </div>
+                        
+                        <h2>add role</h2>
+                        <form id='addRoleForm' action='{$returnLink}' method='post'>
+                        <input type='hidden' name='role_id' value='null'/>
+                        <label>Name: </label><input type='text' name='role_name'/> <br/>
+                        <label>Description: </label><textarea name='role_description'></textarea> <br/>
+                        <input type='hidden' name='requestType' value='addRole'/>
+                        <input type='submit' value='add'/>
+                        </form>
+                    ";
+
+
+                    break;
+
+                // show Events page
+                case 'Events':
+
+                    $sort = 'event_id';
+                    if (isset($_GET["sort"])){
+                        switch ($_GET["sort"]) {
+                            case 'name':
+                                $sort = 'event_name';
+                                break;
+                            case 'description':
+                                $sort = 'event_description';
+                                break;
+                            case 'street':
+                                $sort = 'location_street';
+                                break;
+                            case 'code':
+                                $sort = 'location_postal_code';
+                                break;
+                            case 'city':
+                                $sort = 'location_city';
+                                break;
+                            case 'date':
+                                $sort = 'event_date';
+                                break;
+                            case 'time':
+                                $sort = 'event_time';
+                                break;
+                            case 'max':
+                                $sort = 'event_max_participant';
+                                break;
+                        }
+                    }
+
+                    $where = "";
+                    if(isset($search) AND $search){
+                        $items = ['event_description', 'location_street', 'location_postal_code', 'location_city'];
+                        $where = " WHERE event_name LIKE '%{$search}%'";
+                        foreach($items as $item){
+                            $where .= " OR $item LIKE '%{$search}%'";
+                        }
+                    }
+
+                    // prepares the query and fetches the results
+                    $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, event_date, event_time, event_max_participant, active  FROM `Events`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                    $stmt->bindParam('show', $show, PDO::PARAM_INT);
+                    $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetchAll();
+
+                    echo "
+                        <h1>Events</h1>
                         <table>
                             <tr>
-                                <th> <a href='{$returnLink}&sort=id'>Role</a> </th>
+                                <th> <a href='{$returnLink}&sort=id'>Event Number</a> </th>
                                 <th> <a href='{$returnLink}&sort=name'>Name</a> </th>
                                 <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
+                                <th> <a href='{$returnLink}&sort=street'>Street</a> </th>
+                                <th> <a href='{$returnLink}&sort=code'>Postal Code</a> </th>
+                                <th> <a href='{$returnLink}&sort=city'>City</a> </th>
+                                <th> <a href='{$returnLink}&sort=date'>Date</a> </th>
+                                <th> <a href='{$returnLink}&sort=time'>Time</a> </th>
+                                <th> <a href='{$returnLink}&sort=max'>Max participants</a> </th>
+                                <th> active </th>
                                 <th> Edit </th>
+                            <tr/>
+                        ";
+
+                    // adds the events to the table
+                    foreach ($result as $entry) {
+                        $active = '';
+                        if($entry['active']){
+                            $active = 'checked';
+                        }
+                        echo "
+                            <tr class='{$entry['event_id']}'>
+                                <td> {$entry['event_id']} </td>
+                                <td> <div contenteditable class='event_name'>{$entry['event_name']}</div> </td>
+                                <td> <div contenteditable class='event_description'>{$entry['event_description']}</div> </td>
+                                <td> <div contenteditable class = 'location_street'>{$entry['location_street']}</div> </td>
+                                <td> <div contenteditable class = 'location_postal_code'>{$entry['location_postal_code']}</div> </td>
+                                <td> <div contenteditable class = 'location_city'>{$entry['location_city']}</div> </td>
+                                <td> <input type='date' class='event_date' value='{$entry['event_date']}'></input></td>
+                                <td> <input type='time' class='event_time' value='{$entry['event_time']}'></input></td>
+                                <td> <div contenteditable class = 'event_max_participant'>{$entry['event_max_participant']}</div> </td>
+                                <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
+                                <td> <a href='javascript:updateEvent({$entry['event_id']})'> save changes </a> </td>
                             </tr>
                         ";
+                    }
 
-                        foreach ($result as $entry) {
-                            echo "
-                                <tr class='{$entry['role_id']}'>
-                                    <td> {$entry['role_id']} </td>
-                                    <td> <div contenteditable class='role_name'>{$entry['role_name']}</div></td>
-                                    <td> <div contenteditable class='role_description'>{$entry['role_description']}</div></td>
-                                    <td> <a href='javascript:updateRole({$entry['role_id']})'> save changes </a> </td>
-                                </tr>
-                            ";
+                    $stmt = $handler->prepare("SELECT count(event_id) FROM `Events`");
+                    $stmt-> execute();
+                    $result = $stmt->fetch();
+
+                    echo "
+                        </table>
+                        <div id='pageNav'>
+                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
+                        </div>
+                        
+                        <h2>add event</h2>
+                        <form id='addEventForm' action='{$returnLink}' method='post'>
+                        <input type='hidden' name='event_id' value='null'/>
+                        <label>event name: </label><input type='text' name='event_name'/> <br/>
+                        <label>event description: </label><textarea name='event_description'></textarea> <br/>
+                        <label>street: </label><input type='text' name='location_street'/> <br/>
+                        <label>postal code: </label><input type='text' name='location_postal_code'/> <br/>
+                        <label>city: </label><input type='text' name='location_city'/> <br/>
+                        <label>date: </label><input type='date' name='event_date'/> <br/>
+                        <label>time: </label><input type='time' name='event_time'/> <br/>
+                        <label>max participants: </label><input type='number' name='event_max_participant'/> <br/>
+                        <label>active?: </label><input type='checkbox' name='active' checked='true'/> <br/>
+                        <input type='hidden' name='requestType' value='addEvent'/>
+                        <input type='submit' value = 'add'/>
+                        </form>
+                    ";
+
+
+                    break;
+
+                // show User page
+                case 'Users':
+
+                    $sort = 'user_id';
+                    if (isset($_GET["sort"])){
+                        switch ($_GET["sort"]) {
+                            case 'date':
+                                $sort = 'password_change_date';
+                                break;
+                            case 'first':
+                                $sort = 'first_name';
+                                break;
+                            case 'last':
+                                $sort = 'last_name';
+                                break;
+                            case 'email':
+                                $sort = 'email_address';
+                                break;
+                            case 'type':
+                                $sort = 'type_of_staff';
+                                break;
+                            case 'role':
+                                $sort = 'user_role';
+                                break;
                         }
+                    }
 
-                        $stmt = $handler->prepare("SELECT count(role_id) FROM `Roles`");
-                        $stmt-> execute();
-                        $result = $stmt->fetch();
-
-                        echo "
-                            </table>
-                            <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
-                            </div>
-                            
-                            <h2>add role</h2>
-                            <form id='addRoleForm' action='{$returnLink}' method='post'>
-                            <input type='hidden' name='role_id' value='null'/>
-                            <label>Name: </label><input type='text' name='role_name'/> <br/>
-                            <label>Description: </label><textarea name='role_description'></textarea> <br/>
-                            <input type='hidden' name='requestType' value='addRole'/>
-                            <input type='submit' value='add'/>
-                            </form>
-                        ";
-
-
-                        break;
-
-                    // show Events page
-                    case 'Events':
-
-                        $sort = 'event_id';
-                        if (isset($_GET["sort"])){
-                            switch ($_GET["sort"]) {
-                                case 'name':
-                                    $sort = 'event_name';
-                                    break;
-                                case 'description':
-                                    $sort = 'event_description';
-                                    break;
-                                case 'street':
-                                    $sort = 'location_street';
-                                    break;
-                                case 'code':
-                                    $sort = 'location_postal_code';
-                                    break;
-                                case 'city':
-                                    $sort = 'location_city';
-                                    break;
-                                case 'date':
-                                    $sort = 'event_date';
-                                    break;
-                                case 'time':
-                                    $sort = 'event_time';
-                                    break;
-                                case 'max':
-                                    $sort = 'event_max_participant';
-                                    break;
-                            }
+                    $where = "";
+                    if(isset($search) AND $search){
+                        $items = ['last_name', 'email_address', 'type_of_staff', 'user_role'];
+                        $where = " WHERE first_name LIKE '%{$search}%'";
+                        foreach($items as $item){
+                            $where .= " OR $item LIKE '%{$search}%'";
                         }
+                    }
 
-                        $where = "";
-                        if(isset($search) AND $search){
-                            $items = ['event_description', 'location_street', 'location_postal_code', 'location_city'];
-                            $where = " WHERE event_name LIKE '%{$search}%'";
-                            foreach($items as $item){
-                                $where .= " OR $item LIKE '%{$search}%'";
-                            }
-                        }
+                    // prepares the query and fetches the results
+                    $stmt = $handler->prepare("SELECT user_id, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active  FROM `Users`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
+                    $stmt->bindParam('show', $show, PDO::PARAM_INT);
+                    $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetchAll();
 
-                        // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT event_id, event_name, event_description, location_street, location_postal_code, location_city, event_date, event_time, event_max_participant, active  FROM `Events`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
-                        $stmt->bindParam('show', $show, PDO::PARAM_INT);
-                        $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $result = $stmt->fetchAll();
+                    $stmt = $handler->prepare("SELECT role_id, role_name FROM `Roles` ORDER BY role_id ASC");
+                    $stmt->execute();
+                    $roles = $stmt->fetchAll();
 
-                        echo "
-                            <h1>Events</h1>
-                            <table>
-                                <tr>
-                                    <th> <a href='{$returnLink}&sort=id'>Event Number</a> </th>
-                                    <th> <a href='{$returnLink}&sort=name'>Name</a> </th>
-                                    <th> <a href='{$returnLink}&sort=description'>Description</a> </th>
-                                    <th> <a href='{$returnLink}&sort=street'>Street</a> </th>
-                                    <th> <a href='{$returnLink}&sort=code'>Postal Code</a> </th>
-                                    <th> <a href='{$returnLink}&sort=city'>City</a> </th>
-                                    <th> <a href='{$returnLink}&sort=date'>Date</a> </th>
-                                    <th> <a href='{$returnLink}&sort=time'>Time</a> </th>
-                                    <th> <a href='{$returnLink}&sort=max'>Max participants</a> </th>
-                                    <th> active </th>
-                                    <th> Edit </th>
-                                <tr/>
+                    $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY type_of_staff_id ASC");
+                    $stmt->execute();
+                    $types = $stmt->fetchAll();
+
+                    echo "
+                        <h1>Users</h1>
+                        <table>
+                            <tr>
+                                <th> <a href='{$returnLink}&sort=id'>ID</a> </th>
+                                <th> <a href='{$returnLink}&sort=date'>Password Change Date</a> </th>
+                                <th> <a href='{$returnLink}&sort=first'>First Name</a> </th>
+                                <th> <a href='{$returnLink}&sort=last'>Last Name</a> </th>
+                                <th> <a href='{$returnLink}&sort=email'>Email Address</a> </th>
+                                <th> <a href='{$returnLink}&sort=type'>Account Type</a> </th>
+                                <th> <a href='{$returnLink}&sort=role'>User Role</a> </th>
+                                <th> active </th>
+                                <th> Edit </th>
+                            <tr/>
                             ";
 
-                        // adds the events to the table
-                        foreach ($result as $entry) {
-                            $active = '';
-                            if($entry['active']){
-                                $active = 'checked';
-                            }
-                            echo "
-                                <tr class='{$entry['event_id']}'>
-                                    <td> {$entry['event_id']} </td>
-                                    <td> <div contenteditable class='event_name'>{$entry['event_name']}</div> </td>
-                                    <td> <div contenteditable class='event_description'>{$entry['event_description']}</div> </td>
-                                    <td> <div contenteditable class = 'location_street'>{$entry['location_street']}</div> </td>
-                                    <td> <div contenteditable class = 'location_postal_code'>{$entry['location_postal_code']}</div> </td>
-                                    <td> <div contenteditable class = 'location_city'>{$entry['location_city']}</div> </td>
-                                    <td> <input type='date' class='event_date' value='{$entry['event_date']}'></input></td>
-                                    <td> <input type='time' class='event_time' value='{$entry['event_time']}'></input></td>
-                                    <td> <div contenteditable class = 'event_max_participant'>{$entry['event_max_participant']}</div> </td>
-                                    <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
-                                    <td> <a href='javascript:updateEvent({$entry['event_id']})'> save changes </a> </td>
-                                </tr>
-                            ";
-                        }
-
-                        $stmt = $handler->prepare("SELECT count(event_id) FROM `Events`");
-                        $stmt-> execute();
-                        $result = $stmt->fetch();
-
+                    // adds the users to the table
+                    foreach ($result as $entry) {
                         echo "
-                            </table>
-                            <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
-                            </div>
-                            
-                            <h2>add event</h2>
-                            <form id='addEventForm' action='{$returnLink}' method='post'>
-                            <input type='hidden' name='event_id' value='null'/>
-                            <label>event name: </label><input type='text' name='event_name'/> <br/>
-                            <label>event description: </label><textarea name='event_description'></textarea> <br/>
-                            <label>street: </label><input type='text' name='location_street'/> <br/>
-                            <label>postal code: </label><input type='text' name='location_postal_code'/> <br/>
-                            <label>city: </label><input type='text' name='location_city'/> <br/>
-                            <label>date: </label><input type='date' name='event_date'/> <br/>
-                            <label>time: </label><input type='time' name='event_time'/> <br/>
-                            <label>max participants: </label><input type='number' name='event_max_participant'/> <br/>
-                            <label>active?: </label><input type='checkbox' name='active' checked='true'/> <br/>
-                            <input type='hidden' name='requestType' value='addEvent'/>
-                            <input type='submit' value = 'add'/>
-                            </form>
-                        ";
-
-
-                        break;
-
-                    // show User page
-                    case 'Users':
-
-                        $sort = 'user_id';
-                        if (isset($_GET["sort"])){
-                            switch ($_GET["sort"]) {
-                                case 'date':
-                                    $sort = 'password_change_date';
-                                    break;
-                                case 'first':
-                                    $sort = 'first_name';
-                                    break;
-                                case 'last':
-                                    $sort = 'last_name';
-                                    break;
-                                case 'email':
-                                    $sort = 'email_address';
-                                    break;
-                                case 'type':
-                                    $sort = 'type_of_staff';
-                                    break;
-                                case 'role':
-                                    $sort = 'user_role';
-                                    break;
-                            }
-                        }
-
-                        $where = "";
-                        if(isset($search) AND $search){
-                            $items = ['last_name', 'email_address', 'type_of_staff', 'user_role'];
-                            $where = " WHERE first_name LIKE '%{$search}%'";
-                            foreach($items as $item){
-                                $where .= " OR $item LIKE '%{$search}%'";
-                            }
-                        }
-
-                        // prepares the query and fetches the results
-                        $stmt = $handler->prepare("SELECT user_id, password_change_date, first_name, last_name, email_address, type_of_staff, user_role, active  FROM `Users`{$where} ORDER BY $sort LIMIT :show OFFSET :offset");
-                        $stmt->bindParam('show', $show, PDO::PARAM_INT);
-                        $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $result = $stmt->fetchAll();
-
-                        $stmt = $handler->prepare("SELECT role_id, role_name FROM `Roles` ORDER BY role_id ASC");
-                        $stmt->execute();
-                        $roles = $stmt->fetchAll();
-
-                        $stmt = $handler->prepare("SELECT type_of_staff_id, type_of_staff_description FROM `TypesOfStaff` ORDER BY type_of_staff_id ASC");
-                        $stmt->execute();
-                        $types = $stmt->fetchAll();
-
-                        echo "
-                            <h1>Users</h1>
-                            <table>
-                                <tr>
-                                    <th> <a href='{$returnLink}&sort=id'>ID</a> </th>
-                                    <th> <a href='{$returnLink}&sort=date'>Password Change Date</a> </th>
-                                    <th> <a href='{$returnLink}&sort=first'>First Name</a> </th>
-                                    <th> <a href='{$returnLink}&sort=last'>Last Name</a> </th>
-                                    <th> <a href='{$returnLink}&sort=email'>Email Address</a> </th>
-                                    <th> <a href='{$returnLink}&sort=type'>Account Type</a> </th>
-                                    <th> <a href='{$returnLink}&sort=role'>User Role</a> </th>
-                                    <th> active </th>
-                                    <th> Edit </th>
-                                <tr/>
-                                ";
-
-                        // adds the users to the table
-                        foreach ($result as $entry) {
-                            echo "
-                                <tr class='{$entry['user_id']}'>
-                                    <form> <!-- form added to prevent radio buttons from influencing other users -->
-                                        <td> {$entry['user_id']} </td>
-                                        <td> <div class='password_change_date'>{$entry['password_change_date']}</div> </td>
-                                        <td> <div contenteditable class = 'first_name'>{$entry['first_name']}</div> </td>
-                                        <td> <div contenteditable class = 'last_name'>{$entry['last_name']}</div> </td>
-                                        <td> <div contenteditable class = 'email_address'>{$entry['email_address']}</div> </td>
-                                        <td>
-                                            <select class='type' autocomplete='off'>";
-
-                            // dynamically adds types of staff
-                            foreach($types as $type){
-                                echo "<option value='{$type['type_of_staff_id']}'" . (($entry['type_of_staff'] == $type['type_of_staff_id']) ? "selected" : '') . ">{$type['type_of_staff_description']}</option>";
-                            }
-
-                            echo "
-                                            </select>
-                                        </td>
-                                        <td>
-                                            <select class='role' autocomplete='off'>
-                                                ";
-
-                            // dynamically adds roles
-                            foreach($roles as $role){
-                                echo "<option value='{$role['role_id']}'" . (($entry['user_role'] == $role['role_id']) ? "selected" : '') . ">{$role['role_name']}</option>";
-                            }
-
-                            $active = '';
-                            if($entry['active']){
-                                $active = 'checked';
-                            }
-
-                            echo "
-                                            </select>
-                                        </td>
-                                        <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
-                                        <td> <a href='javascript:updateUser({$entry['user_id']})'> save changes </a> </td>
-                                    </form>
-                                </tr>
-                            ";
-                        }
-
-                        $stmt = $handler->prepare("SELECT count(user_id) FROM `Users`");
-                        $stmt-> execute();
-                        $result = $stmt->fetch();
-
-
-                        // creates the "add new user" form (this also serves as the form for modifying users)
-                        echo "
-                            </table>
-                            <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
-                            </div>
-                            
-                            <h2>add user</h2>
-                            <form id='addUserForm' action='{$returnLink}' method='post'>
-                            <input type='hidden' name='user_id' value='null'/>
-                            <label>first name:</label><input type='text' name='first_name'>
-                            <label>last name:</label><input type='text' name='last_name'>
-                            <label>email adress:</label><input type='text' name='email_address'>
-                            <label>user type: </label>
-                            <select name='type_of_staff' autocomplete='off'>
-                            ";
+                            <tr class='{$entry['user_id']}'>
+                                <form> <!-- form added to prevent radio buttons from influencing other users -->
+                                    <td> {$entry['user_id']} </td>
+                                    <td> <div class='password_change_date'>{$entry['password_change_date']}</div> </td>
+                                    <td> <div contenteditable class = 'first_name'>{$entry['first_name']}</div> </td>
+                                    <td> <div contenteditable class = 'last_name'>{$entry['last_name']}</div> </td>
+                                    <td> <div contenteditable class = 'email_address'>{$entry['email_address']}</div> </td>
+                                    <td>
+                                        <select class='type' autocomplete='off'>";
 
                         // dynamically adds types of staff
                         foreach($types as $type){
-                            echo "<option value='{$type['type_of_staff_id']}'>{$type['type_of_staff_description']}</option>";
+                            echo "<option value='{$type['type_of_staff_id']}'" . (($entry['type_of_staff'] == $type['type_of_staff_id']) ? "selected" : '') . ">{$type['type_of_staff_description']}</option>";
                         }
 
-                            echo "
-                            </select>
-                            <label>user role:</label>
-                            <select name='user_role' autocomplete='off'>
-                            ";
+                        echo "
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select class='role' autocomplete='off'>
+                                            ";
 
                         // dynamically adds roles
                         foreach($roles as $role){
-                            echo "<option value='{$role['role_id']}'>{$role['role_name']}</option>";
+                            echo "<option value='{$role['role_id']}'" . (($entry['user_role'] == $role['role_id']) ? "selected" : '') . ">{$role['role_name']}</option>";
+                        }
+
+                        $active = '';
+                        if($entry['active']){
+                            $active = 'checked';
                         }
 
                         echo "
-                            </select>
-                            <label>active?: </label><input type='checkbox' name='active' checked='true'/>
-                            <input type='hidden' name='requestType' value='addUser'/>
-                            <input type='submit' value='add'/>
-                            </form>
-                        ";
-
-                        break;
-
-                    // shows the event details page
-                    case 'EventDetails':
-
-                        $sort = 'event_details_id';
-                        if (isset($_GET["sort"])){
-                            switch ($_GET["sort"]) {
-                                case 'event':
-                                    $sort = 'event_id';
-                                    break;
-                                case 'user':
-                                    $sort = 'user_id';
-                                    break;
-                                case 'date':
-                                    $sort = 'checkin_date';
-                                    break;
-                                case 'first_name':
-                                    $sort = 'first_name';
-                                    break;
-                                case 'last_name':
-                                    $sort = 'last_name';
-                                    break;
-                                case 'email':
-                                    $sort = 'email_address';
-                                    break;
-                            }
-                        }
-
-                        // adds the where statement based on what is filled into the search bar
-                        $where = "";
-                        if(isset($search) AND $search){
-                            $items = ['checkin_date','event_name', 'first_name', 'last_name', 'email_address']; // removed 'Event_Details.event_id', 'Event_Details.user_id' due to inability to specify between numbers
-                            // start of search as well as functionality as a day, and month format search (using the format yyyy-mm-dd)
-                            $where = " WHERE event_details_id LIKE '%{$search}%'
-                            or checkin_date LIKE '{$search}-__ %'
-                            or checkin_date LIKE '{$search} %'";
-                            foreach($items as $item){
-                                $where .= " OR $item LIKE '%{$search}%'";
-                            }
-                        }
-
-                        $stmt = $handler->prepare("
-                            SELECT Event_Details.event_details_id, Event_Details.event_id, Event_Details.user_id, Event_Details.checkin_date, Events.event_name, Users.first_name, Users.last_name, Users.email_address
-                            FROM (`Event_Details` JOIN `Events` ON Event_Details.event_id = Events.event_id INNER JOIN `Users` ON Event_Details.user_id = Users.user_id)
-                            {$where} 
-                            ORDER BY $sort LIMIT :show 
-                            OFFSET :offset");
-                        $stmt->bindParam('show', $show, PDO::PARAM_INT);
-                        $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $result = $stmt->fetchAll();
-
-                        echo "
-                        <h1>Event Details</h1>
-                        <table>
-                            <tr>
-                                <th> <a href='{$returnLink}&sort=id'>Event Details ID</a> </th>
-                                <th> <a href='{$returnLink}&sort=event_name'>Event Name</a> </th>
-                                <th> <a href='{$returnLink}&sort=first_name'>First Name</a> </th>
-                                <th> <a href='{$returnLink}&sort=last_name'>Last Name</a> </th>
-                                <th> <a href='{$returnLink}&sort=email'>User Email Address</a> </th>
-                                <th> <a href='{$returnLink}&sort=date'>Check-In Date</a></th>
-                                <th> <a href='{$returnLink}&sort=event'>Event ID</a> </th>
-                                <th> <a href='{$returnLink}&sort=user'>User ID</a> </th>
+                                        </select>
+                                    </td>
+                                    <td> <input type='checkbox' class='active' $active autocomplete='off'></td>
+                                    <td> <a href='javascript:updateUser({$entry['user_id']})'> save changes </a> </td>
+                                </form>
                             </tr>
                         ";
+                    }
 
-                        foreach ($result as $entry) {
-                            echo "
-                                <tr class='{$entry['event_details_id']}'>
-                                    <td> {$entry['event_details_id']} </td>
-                                    <td> <div class='event_name'>{$entry['event_name']}</div></td>
-                                    <td> <div class='first_name'>{$entry['first_name']}</div></td>
-                                    <td> <div class='last_name'>{$entry['last_name']}</div></td>
-                                    <td> <div class='email_address'>{$entry['email_address']}</div></td>
-                                    <td> <input type='timestamp' class='event_date' value='{$entry['checkin_date']}'></input></td>
-                                    <td> <div class='event'>{$entry['event_id']}</div></td>
-                                    <td> <div class='user'>{$entry['user_id']}</div></td>
-                                </tr>
-                            ";
-                        }
+                    $stmt = $handler->prepare("SELECT count(user_id) FROM `Users`");
+                    $stmt-> execute();
+                    $result = $stmt->fetch();
 
-                        $stmt = $handler->prepare("SELECT count(event_details_id) FROM `Event_Details`");
-                        $stmt-> execute();
-                        $result = $stmt->fetch();
+
+                    // creates the "add new user" form (this also serves as the form for modifying users)
+                    echo "
+                        </table>
+                        <div id='pageNav'>
+                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
+                        </div>
+                        
+                        <h2>add user</h2>
+                        <form id='addUserForm' action='{$returnLink}' method='post'>
+                        <input type='hidden' name='user_id' value='null'/>
+                        <label>first name:</label><input type='text' name='first_name'>
+                        <label>last name:</label><input type='text' name='last_name'>
+                        <label>email adress:</label><input type='text' name='email_address'>
+                        <label>user type: </label>
+                        <select name='type_of_staff' autocomplete='off'>
+                        ";
+
+                    // dynamically adds types of staff
+                    foreach($types as $type){
+                        echo "<option value='{$type['type_of_staff_id']}'>{$type['type_of_staff_description']}</option>";
+                    }
+
                         echo "
-                            </table>
-                            <div id='pageNav'>
-                                <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
-                                <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
-                            </div>
-                    ";
-                }
+                        </select>
+                        <label>user role:</label>
+                        <select name='user_role' autocomplete='off'>
+                        ";
 
+                    // dynamically adds roles
+                    foreach($roles as $role){
+                        echo "<option value='{$role['role_id']}'>{$role['role_name']}</option>";
+                    }
+
+                    echo "
+                        </select>
+                        <label>active?: </label><input type='checkbox' name='active' checked='true'/>
+                        <input type='hidden' name='requestType' value='addUser'/>
+                        <input type='submit' value='add'/>
+                        </form>
+                    ";
+
+                    break;
+
+                // shows the event details page
+                case 'EventDetails':
+
+                    $sort = 'event_details_id';
+                    if (isset($_GET["sort"])){
+                        switch ($_GET["sort"]) {
+                            case 'event':
+                                $sort = 'event_id';
+                                break;
+                            case 'user':
+                                $sort = 'user_id';
+                                break;
+                            case 'date':
+                                $sort = 'checkin_date';
+                                break;
+                            case 'first_name':
+                                $sort = 'first_name';
+                                break;
+                            case 'last_name':
+                                $sort = 'last_name';
+                                break;
+                            case 'email':
+                                $sort = 'email_address';
+                                break;
+                        }
+                    }
+
+                    // adds the where statement based on what is filled into the search bar
+                    $where = "";
+                    if(isset($search) AND $search){
+                        $items = ['checkin_date','event_name', 'first_name', 'last_name', 'email_address']; // removed 'Event_Details.event_id', 'Event_Details.user_id' due to inability to specify between numbers
+                        // start of search as well as functionality as a day, and month format search (using the format yyyy-mm-dd)
+                        $where = " WHERE event_details_id LIKE '%{$search}%'
+                        or checkin_date LIKE '{$search}-__ %'
+                        or checkin_date LIKE '{$search} %'";
+                        foreach($items as $item){
+                            $where .= " OR $item LIKE '%{$search}%'";
+                        }
+                    }
+
+                    $stmt = $handler->prepare("
+                        SELECT Event_Details.event_details_id, Event_Details.event_id, Event_Details.user_id, Event_Details.checkin_date, Events.event_name, Users.first_name, Users.last_name, Users.email_address
+                        FROM (`Event_Details` JOIN `Events` ON Event_Details.event_id = Events.event_id INNER JOIN `Users` ON Event_Details.user_id = Users.user_id)
+                        {$where} 
+                        ORDER BY $sort LIMIT :show 
+                        OFFSET :offset");
+                    $stmt->bindParam('show', $show, PDO::PARAM_INT);
+                    $stmt->bindParam('offset', $offset, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $result = $stmt->fetchAll();
+
+                    echo "
+                    <h1>Event Details</h1>
+                    <table>
+                        <tr>
+                            <th> <a href='{$returnLink}&sort=id'>Event Details ID</a> </th>
+                            <th> <a href='{$returnLink}&sort=event_name'>Event Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=first_name'>First Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=last_name'>Last Name</a> </th>
+                            <th> <a href='{$returnLink}&sort=email'>User Email Address</a> </th>
+                            <th> <a href='{$returnLink}&sort=date'>Check-In Date</a></th>
+                            <th> <a href='{$returnLink}&sort=event'>Event ID</a> </th>
+                            <th> <a href='{$returnLink}&sort=user'>User ID</a> </th>
+                        </tr>
+                    ";
+
+                    foreach ($result as $entry) {
+                        echo "
+                            <tr class='{$entry['event_details_id']}'>
+                                <td> {$entry['event_details_id']} </td>
+                                <td> <div class='event_name'>{$entry['event_name']}</div></td>
+                                <td> <div class='first_name'>{$entry['first_name']}</div></td>
+                                <td> <div class='last_name'>{$entry['last_name']}</div></td>
+                                <td> <div class='email_address'>{$entry['email_address']}</div></td>
+                                <td> <input type='timestamp' class='event_date' value='{$entry['checkin_date']}'></input></td>
+                                <td> <div class='event'>{$entry['event_id']}</div></td>
+                                <td> <div class='user'>{$entry['user_id']}</div></td>
+                            </tr>
+                        ";
+                    }
+
+                    $stmt = $handler->prepare("SELECT count(event_details_id) FROM `Event_Details`");
+                    $stmt-> execute();
+                    $result = $stmt->fetch();
+                    echo "
+                        </table>
+                        <div id='pageNav'>
+                            <button ". ($page<=1?'disabled' : '') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page-1) ."';\"> back </button>
+                            <button ". ($page < ceil($result['0']/$show)? '' : 'disabled') ." onclick=\"window.location.href='adminTool.php?view={$view}&show={$show}&page=". ($page+1) ."';\"> next </button>
+                        </div>
+                ";
             }
         }
         echo "    </div>
