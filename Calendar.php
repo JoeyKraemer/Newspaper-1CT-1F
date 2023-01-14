@@ -95,7 +95,7 @@ catch(Exception $ex){
                 <?php
                 if(isset($dbHandler)){
                     try {
-                        $currDate = date("o") . "-" . date("m") . "-" . $today;
+                        $currDate = date("o") . "-" . $_SESSION["month"] + 1 . "-" . $today;
                         $stmt = $dbHandler->prepare("SELECT * FROM `Events` WHERE event_date = :event_date");
                         $stmt->bindParam("event_date", $currDate, PDO::PARAM_STR);
 
@@ -202,7 +202,7 @@ catch(Exception $ex){
                 }
             }
             echo("</tr>");
-            // TODO: Welcome user, connect header footer
+            // TODO: Welcome user
             ?>
         </table>
     </div>
