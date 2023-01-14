@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Media queries */
+@font-face {
+    font-family: 'Inter';
+    src: url("fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
+}
+
+/*HMTL Tags*/
+body {
+    background-color: #B2BCBC;
+    padding: 0;
+    margin: 0;
+    font-family: Inter;
+}
+
+header {
+    grid-column: 1/11;
+    background-color:#50595B;
+    color: #F1F1F1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header p {
+    font-size: 2.25rem;
+    margin-left: 1.25rem;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    background-color: #D9D9D9;
+    border-radius: 100%;
+    margin-right: 1.563rem;
+}
+
+nav li img{
+    padding: 0.938rem;
+    height: 1.875rem;
+    width: 1.875rem;
+}
+
+nav li a {
+    text-decoration: none;
+}
+
+footer {
+    bottom: 0;
+    grid-column: 1/11;
+    background-color: #50595B;
+    color: white;
+    height: 89px;
+    margin-top: auto;
+}
+
+table {
+    font-family: arial, sans-serif;
+    border-spacing: 25px;
+    border-collapse: separate;
+    padding-left: 50px;
+    padding-right: 50px;
+    background-color: #FFFFFF;
+    display: block;
+}
+
+td, th {
+    text-align: left;
+    padding: 8px;
+    border-radius: 50%;
+    text-align: center;
+
+    height: 25px;
+    width: 25px;
+    background-color: #dddddd;
+    color: #50595B;
+}
+
+a{
+    color: #50595B;
+}
+
+a:link{
+    text-decoration: none;
+}
+
+a:visited{
+    text-decoration: none;
+}
+
+a:hover{
+    color: #F1F1F1;
+}
+
+a:active{
+    text-decoration: none;
+}
+
+ul {
+    padding: 0;
+    margin: 0;
+}
+
+li{
+    margin-left: 15px;
+}
+
+
+/*Hidden Elements*/
+
+/*IDs*/
+#container {
+    display: grid;
+    font-family: Inter;
+    font-weight: 400;
+    grid-template-columns: repeat(10,1fr);
+}
+
+#dateAndEvents {
+    display: flex;
+    background-color: #50595B;
+    color: white;
+    flex-direction: column;
+    flex-wrap: wrap;
+    min-width: 15%;
+    max-width: 25%;
+
+}
+
+#date {
+    display: flex;
+    flex-direction: row;
+}
+
+#date h3 {
+    margin: 0;
+    padding: 0;
+    line-height: 1.25em;
+    font-family: Inter;
+    font-weight: 400;
+}
+
+#daysAndWeeks {
+    grid-column: 5/10;
+}
+
+#calendar {
+    display: flex;
+    grid-column: 2/10;
+    background-color: #F1F1F1;
+    padding: 1%;
+    height: 470px;
+    justify-content: center;
+}
+
+/*Classes*/
+.WelcomeUser {
+    grid-column: 2/10;
+    background-color: #F1F1F1;
+    height: 100px;
+}
+
+.eventList{
+    padding-right: 10%;
+}
+
+.monthSelect{
+    display: flex;
+    flex-direction: row;
+}

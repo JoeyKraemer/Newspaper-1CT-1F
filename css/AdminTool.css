@@ -1,18 +1,6 @@
 @font-face {
 font-family: 'Inter';
 src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
-
-html, body{
-    margin: 0;
-    padding: 0;
-}
-table, th, td {
-    border: 1px solid;
-}
-
-.errormessage{
-    color: darkred;
-    height:fit-content;
 }
 
 body {
@@ -29,15 +17,6 @@ main{
     grid-column: 4/10;
     background-color: #FFFF;
 }
-
-#main{
-    background-color: #F1F1F1;
-    grid-column: 2/4;
-    display: inline-grid;
-    justify-content: center;
-    height: 100vh;
-    grid-template-rows: auto 1fr;
-
 button{
     background-color: #FFFF;
     border: 2px;
