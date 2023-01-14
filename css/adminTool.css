@@ -2,6 +2,18 @@
 font-family: 'Inter';
 src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
 }
+html, body{
+    margin: 0;
+    padding: 0;
+}
+table, th, td {
+    border: 1px solid;
+}
+
+.errormessage{
+    color: darkred;
+    height:fit-content;
+}
 
 html, body{
     margin: 0;
@@ -47,12 +59,23 @@ nav>a {
     display: inline-grid;
     justify-content: center;
     height: calc(100vh - 4.53vw - 89px);
+    grid-template-rows: auto 1fr;
 }
 #main2{
     justify-content: center;
     display: grid;
     width: 55vw;
     height: 10vw;
+}
+button{
+    background-color: #FFFF;
+    border: 2px;
+}
+input{
+    text-align: center;
+}
+option{
+    text-align: center;
 }
 
 #searchbar{
