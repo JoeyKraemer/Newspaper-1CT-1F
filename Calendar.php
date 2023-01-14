@@ -35,20 +35,20 @@ catch(Exception $ex){
         </nav>
     </header>
         <?php
-    //    if(isset($dbHandler)) {
-    //        try {
-    //            $welcomeUser = "Welcome, " . $_GET['user_name'];
-    //            $userstmt = $dbHandler->prepare("SELECT * FROM 'Users' WHERE first_name = :user_name");
-    //            $userstmt->bindParam('user_name', $welcomeUser, PDO::PARAM_STR);
-    //
-    //            $userstmt->execute();
-    //            if ($user = $userstmt->fetch(PDO::FETCH_OBJ)) {
-    //                echo "<div class='WelcomeUser'><h2>Welcome," . $user . "</h2></div>";
-    //            }
-    //        } catch (Exception $e) {
-    //
-    //        }
-    //    }
+        if(isset($dbHandler)) {
+            try {
+                $welcomeUser = "Welcome, " . $_GET['user_id'];
+                $userstmt = $dbHandler->prepare("SELECT * FROM `Users` WHERE user_id = 7");
+                $userstmt->bindParam('user_id', $welcomeUser, PDO::PARAM_STR);
+
+                $userstmt->execute();
+                if ($user = $userstmt->fetch(PDO::FETCH_OBJ)) {
+                    echo "<div class='WelcomeUser'><h2>Welcome," . $user . "</h2></div>";
+                }
+            } catch (Exception $e) {
+
+            }
+        }
         ?>
     <div id="calendar">
         <div id="dateAndEvents">
@@ -76,10 +76,21 @@ catch(Exception $ex){
                     }
                 }
 
-                echo '<div id="date"><span style="font-size: 3em;" id="calendarDate">' . $today . '</span><h3>'. $months[$_SESSION["month"]] . '<br>' . date("o") . '</h3></div>';
+                echo '<div id="date"><span style="font-size: 3em;" id="calendarDate">' . $today . '</span>        
+                          <div class="monthSelect">
+                              <form action="Calendar.php" method="get">
+                                  <input type="submit" value="<">
+                                  <input type="hidden" name="month" value="-1">
+                              </form>
+                              <p style="margin: 0"><h3>'. $months[$_SESSION["month"]] . '<br>' . date("o") . '</h3></p>
+                              <form action="Calendar.php" method="get">
+                                  <input type="submit" value=">">
+                                  <input type="hidden" name="month" value="+1">
+                              </form>
+                          </div>
+                      </div>';
             }
             ?>
-
             <div class="eventList">
                 <?php
                 if(isset($dbHandler)){
@@ -91,12 +102,12 @@ catch(Exception $ex){
                         $stmt->execute();
                         $value = $stmt->fetch(PDO::FETCH_OBJ);
                         if ($stmt->rowCount() > 0) {
-                            echo "<br>";
-                            echo "<u>Upcoming Events</u>";
-                            echo "<ul>" . $value->event_name . "</ul>";
-                            echo "<li>" . $value->event_description . "</li>";
-                            echo "<li>" . $value->event_time . " "  . $value->event_date . "</li>";
-                            echo "<li>" . $value->location_street . " " . $value->location_city . ", " . $value->location_postal_code . "</li>";
+                            echo "<br>
+                                  <u>Upcoming Events</u>
+                                  <ul>" . $value->event_name . "</ul>
+                                  <li>" . $value->event_description . "</li>
+                                  <li>" . $value->event_time . " "  . $value->event_date . "</li>
+                                  <li>" . $value->location_street . " " . $value->location_city . ", " . $value->location_postal_code . "</li>";
                         }
                     }
                     catch(Exception $ex){
@@ -108,17 +119,6 @@ catch(Exception $ex){
                 }
                 ?>
             </div>
-        </div>
-        <div style="display: flex; flex-direction: row;">
-            <form action="Calendar.php" method="get">
-                <input type="submit" value="<">
-                <input type="hidden" name="month" value="-1">
-            </form>
-            <p style="margin: 0"><?php echo $months[$_SESSION["month"]]; ?></p>
-            <form action="Calendar.php" method="get">
-                <input type="submit" value=">">
-                <input type="hidden" name="month" value="+1">
-            </form>
         </div>
         <table border='0'>
 
