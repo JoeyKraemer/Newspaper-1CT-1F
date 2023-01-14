@@ -1,0 +1,137 @@
+/* media queries */
+@font-face {
+    font-family: 'Inter';
+    src: url("../fonts/Inter-VariableFont_slnt,wght.ttf") format("opentype");
+}
+
+/* html tags */
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    background-color:#B2BCBC;
+    font-family: Inter;
+}
+
+header {
+    grid-column: 1/11;
+}
+
+main {
+    grid-column: 2/10;
+    background-color: #F1F1F1;
+    height: 100vh;
+}
+
+ul li {
+    justify-content: space-around;
+}
+
+ul {
+    list-style-type: none;
+    display: flex;
+}
+
+/* class */
+.orgfile {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    background-color:#FFFF;
+    box-shadow: 0px 6px 6px #B2BCBC;
+}
+
+.myfiletext {
+    padding-left: 10px;
+}
+
+.orgfiletext {
+    padding-left: 10px;	
+}
+
+.uploadicons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.uploadicons li {
+    display:flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.uploadicons a {
+    height: 100%;
+    width: 100%;
+    display:flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.uploadicons img {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.icons {
+    padding-inline: 15px;
+}
+
+.contextMenu a {
+    display: block;
+    padding-top: 0.5vw;
+}
+
+/* table */
+#filesTable {
+    width: 79vw;
+    margin-left: auto;
+    margin-right: auto;
+    height: 2.8rem;
+}
+
+#filesTable tr {
+    box-shadow: 0 2px 0 #8F8F8F inset,
+                0 -2px 0 #8F8F8F inset;
+}
+
+#filesTable .file_name {
+    font-weight: bold;
+}
+
+#filesTable .file_name {
+    width: 1%;
+    white-space: nowrap;
+}
+
+#filesTable .file_size {
+    color: #8F8F8F;
+}
+
+#filesTable .file_ctime {
+    text-align: right;
+    position: relative;
+    right: 3vw;
+}
+
+#filesTable .options img {
+    display:flex;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+#form {
+    display: none;
+}
+
+#myfile {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px;
+    box-shadow: 0px 6px 6px #B2BCBC;
+    background-color:#FFFF;
+}
